@@ -47,6 +47,18 @@
         .option-input {display:flex;gap:10px;margin:5px 0;}
         .option-input input {flex:1;}
         .option-input button {width:auto;padding:8px 12px;}
+        /* 限时设置区域 */
+        .time-limit-group {margin:20px 0;padding:15px;background:#f8f9fa;border-radius:6px;border-left:4px solid #007bff;}
+        .time-limit-row {display:flex;gap:10px;margin-bottom:10px;align-items:center;}
+        .time-limit-row input {flex:1;}
+        .time-limit-row button {width:auto;padding:8px 15px;margin:0;}
+        .time-limit-item {background:#fff;padding:10px;border:1px solid #ddd;border-radius:4px;margin-bottom:10px;}
+        .time-limit-header {display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+        .time-limit-header h4 {margin:0;}
+        .status-badge {padding:4px 10px;border-radius:20px;font-size:14px;font-weight:normal;}
+        .status-active {background:#d4edda;color:#155724;}
+        .status-expired {background:#f8d7da;color:#721c24;}
+        .status-pending {background:#fff3cd;color:#856404;}
     </style>
 </head>
 <body>
@@ -72,6 +84,7 @@
             <div class="tab-nav">
                 <button class="active" onclick="switchTab('configTab')">系统配置</button>
                 <button onclick="switchTab('questionTab')">题目管理</button>
+                <button onclick="switchTab('timeLimitTab')">限时设置</button>
                 <button onclick="switchTab('answerTab')">答案管理</button>
             </div>
 
@@ -90,7 +103,7 @@
                     </div>
                 </div>
 
-                <!-- 等级配置（修复：移除模板字符串，改为空容器由JS动态生成） -->
+                <!-- 等级配置 -->
                 <div class="form-group">
                     <label>启用考试等级（1-8级）：</label>
                     <div class="checkbox-group" id="levelCheckbox"></div>
@@ -99,16 +112,39 @@
                 <!-- 考试时间配置 -->
                 <div class="form-group">
                     <label for="examStartTimeInput">考试开始时间：</label>
-                    <input type="datetime-local" id="examStartTimeInput" placeholder="选择考试开始时间">
+                    <input type="datetime-local" id="examStartTimeInput">
+                </div>
+
+                <!-- GitHub 配置 -->
+                <div class="form-group" style="border-top:1px solid #ddd;padding-top:20px;margin-top:20px;">
+                    <h3 style="margin-bottom:15px;">GitHub 自动同步配置</h3>
+                    <div class="form-group">
+                        <label for="githubToken">GitHub Token：</label>
+                        <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxx" value="ghp_your_token_here">
+                        <small style="color:#666;">需要 repo 权限，不会明文显示</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="githubRepo">仓库名：</label>
+                        <input type="text" id="githubRepo" value="xxy150310git.github.io">
+                    </div>
+                    <div class="form-group">
+                        <label for="githubPath">文件路径：</label>
+                        <input type="text" id="githubPath" value="questions.js">
+                    </div>
                 </div>
 
                 <button class="btn-success" onclick="saveConfig()">保存系统配置</button>
                 <button class="btn-warning" onclick="exportConfig()">导出配置（替换config.js）</button>
             </div>
 
-            <!-- 题目管理标签页（仅选择/判断题） -->
+            <!-- 题目管理标签页 -->
             <div class="tab-content" id="questionTab">
                 <h2>题目管理（仅选择题/判断题）</h2>
+
+                <!-- GitHub 同步状态 -->
+                <div id="githubSyncStatus" style="margin-bottom:15px;padding:10px;background:#e7f3ff;border-radius:4px;display:none;">
+                    <span id="syncStatusText">准备同步...</span>
+                </div>
 
                 <!-- 新增/编辑题目表单 -->
                 <div class="form-group">
@@ -177,8 +213,10 @@
                 </div>
 
                 <input type="hidden" id="qId">
-                <button class="btn-success" onclick="saveQuestion()">保存题目</button>
-                <button class="btn-danger" onclick="resetQuestionForm()">清空表单</button>
+                <div style="display:flex;gap:10px;">
+                    <button class="btn-success" onclick="saveQuestion()" style="flex:2;">保存题目（自动同步到GitHub）</button>
+                    <button class="btn-danger" onclick="resetQuestionForm()" style="flex:1;">清空表单</button>
+                </div>
 
                 <!-- 题目列表 -->
                 <h3 style="margin-top:30px;">题目列表</h3>
@@ -195,6 +233,55 @@
                     </thead>
                     <tbody id="questionTableBody"></tbody>
                 </table>
+                <button class="btn-warning" onclick="syncFromGitHub()" style="margin-top:10px;">从GitHub重新加载题目</button>
+            </div>
+
+            <!-- 限时设置标签页（新增） -->
+            <div class="tab-content" id="timeLimitTab">
+                <h2>限时设置</h2>
+                <p style="color:#666;margin-bottom:20px;">可以设置多个考试时间段，考生只能在指定时间内进入考试。</p>
+
+                <!-- 新增限时规则表单 -->
+                <div class="time-limit-group">
+                    <h3 style="margin-bottom:15px;">新增限时规则</h3>
+                    <div class="time-limit-row">
+                        <input type="datetime-local" id="limitStartTime" style="flex:2;">
+                        <span style="padding:0 10px;">至</span>
+                        <input type="datetime-local" id="limitEndTime" style="flex:2;">
+                    </div>
+                    <div class="time-limit-row">
+                        <select id="limitLanguage" style="flex:1;">
+                            <option value="all">所有语言</option>
+                            <option value="C++">C++</option>
+                            <option value="Python">Python</option>
+                            <option value="Java">Java</option>
+                            <option value="Scratch">Scratch</option>
+                        </select>
+                        <select id="limitLevel" style="flex:1;">
+                            <option value="all">所有等级</option>
+                            <option value="1">1级</option>
+                            <option value="2">2级</option>
+                            <option value="3">3级</option>
+                            <option value="4">4级</option>
+                            <option value="5">5级</option>
+                            <option value="6">6级</option>
+                            <option value="7">7级</option>
+                            <option value="8">8级</option>
+                        </select>
+                        <input type="text" id="limitDescription" placeholder="描述（如：第一场考试）" style="flex:2;">
+                    </div>
+                    <button class="btn-success" onclick="addTimeLimit()" style="width:auto;padding:10px 30px;">添加限时规则</button>
+                </div>
+
+                <!-- 限时规则列表 -->
+                <h3 style="margin-top:30px;">当前限时规则</h3>
+                <div id="timeLimitList"></div>
+
+                <!-- 批量操作 -->
+                <div style="margin-top:20px;display:flex;gap:10px;">
+                    <button class="btn-warning" onclick="saveTimeLimits()">保存限时规则到GitHub</button>
+                    <button class="btn-danger" onclick="clearAllTimeLimits()">清空所有规则</button>
+                </div>
             </div>
 
             <!-- 答案管理标签页 -->
@@ -233,79 +320,31 @@
     </div>
 
     <script>
-        // 全局变量
+        // ==================== 全局变量 ====================
         let config = {};
         let questions = [];
         let answers = [];
+        let timeLimits = []; // 新增：限时规则数组
         let currentTab = 'configTab';
 
-        // 管理员登录
-        function adminLogin() {
-            const acc = document.getElementById('adminAccount').value.trim();
-            const pwd = document.getElementById('adminPwd').value.trim();
+        // GitHub 配置
+        let githubConfig = {
+            owner: 'xxy150310git',
+            repo: 'xxy150310git.github.io',
+            path: 'questions.js',
+            token: 'ghp_your_token_here'
+        };
 
-            // 加载配置验证账号
-            loadScript('config.js', () => {
-                const adminAccounts = (window.ojConfig || {}).adminAccounts || [];
-                const isValid = adminAccounts.some(item => item.account === acc && item.pwd === pwd);
+        // ==================== 初始化 ====================
+        // 页面加载时初始化等级复选框
+        window.onload = function() {
+            initLevelCheckboxDOM();
+        };
 
-                if (isValid) {
-                    // 登录成功，切换到管理区域
-                    document.getElementById('loginArea').classList.remove('active');
-                    document.getElementById('manageArea').classList.add('active');
-                    // 初始化管理数据
-                    initManageData();
-                } else {
-                    alert('账号或密码错误！');
-                }
-            });
-        }
-
-        // 切换标签页
-        function switchTab(tabId) {
-            // 切换导航按钮样式
-            document.querySelectorAll('.tab-nav button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-
-            // 切换内容区域
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.getElementById(tabId).classList.add('active');
-            currentTab = tabId;
-
-            // 刷新当前标签页数据
-            if (tabId === 'questionTab') {
-                loadQuestions();
-                toggleQuestionForm(); // 初始化题目表单显示
-            }
-            if (tabId === 'answerTab') loadAnswers();
-        }
-
-        // 初始化管理数据
-        function initManageData() {
-            // 加载系统配置
-            loadScript('config.js', () => {
-                config = window.ojConfig || {};
-                // 初始化配置表单（内部会先生成等级复选框DOM）
-                initConfigForm();
-            });
-
-            // 加载题目
-            loadQuestions();
-
-            // 加载答案
-            loadAnswers();
-        }
-
-        // 新增：初始化等级复选框的DOM元素
+        // 初始化等级复选框
         function initLevelCheckboxDOM() {
             const levelCheckboxEl = document.getElementById('levelCheckbox');
-            // 清空原有内容
             levelCheckboxEl.innerHTML = '';
-            // 动态生成1-8级的复选框
             for (let i = 1; i <= 8; i++) {
                 const checkboxItem = document.createElement('div');
                 checkboxItem.className = 'checkbox-item';
@@ -317,43 +356,88 @@
             }
         }
 
-        // 初始化配置表单（修复：先生成等级复选框DOM）
-        function initConfigForm() {
-            // 先动态生成等级复选框的DOM元素
-            initLevelCheckboxDOM();
+        // ==================== 管理员登录 ====================
+        function adminLogin() {
+            const acc = document.getElementById('adminAccount').value.trim();
+            const pwd = document.getElementById('adminPwd').value.trim();
 
+            loadScript('config.js', () => {
+                const adminAccounts = (window.ojConfig || {}).adminAccounts || [];
+                const isValid = adminAccounts.some(item => item.account === acc && item.pwd === pwd);
+
+                if (isValid) {
+                    document.getElementById('loginArea').classList.remove('active');
+                    document.getElementById('manageArea').classList.add('active');
+                    initManageData();
+                } else {
+                    alert('账号或密码错误！');
+                }
+            });
+        }
+
+        // ==================== 初始化管理数据 ====================
+        function initManageData() {
+            // 加载配置
+            loadScript('config.js', () => {
+                config = window.ojConfig || {};
+                initConfigForm();
+                
+                // 从 localStorage 加载限时规则
+                const savedLimits = localStorage.getItem('gesp_time_limits');
+                if (savedLimits) {
+                    timeLimits = JSON.parse(savedLimits);
+                }
+                renderTimeLimitList();
+            });
+
+            // 加载题目
+            loadQuestions();
+
+            // 加载答案
+            loadAnswers();
+
+            // 读取 GitHub 配置
+            const savedToken = localStorage.getItem('github_token');
+            if (savedToken) {
+                document.getElementById('githubToken').value = savedToken;
+                githubConfig.token = savedToken;
+            }
+            document.getElementById('githubRepo').value = githubConfig.repo;
+            document.getElementById('githubPath').value = githubConfig.path;
+        }
+
+        // ==================== 系统配置相关 ====================
+        function initConfigForm() {
             // 初始化语言复选框
             const enabledLangs = config.enabledLanguages || [];
             ['lang_cpp', 'lang_python', 'lang_java', 'lang_scratch'].forEach(id => {
                 const el = document.getElementById(id);
-                el.checked = enabledLangs.includes(el.value);
+                if (el) el.checked = enabledLangs.includes(el.value);
             });
 
-            // 初始化等级复选框（现在DOM已生成）
+            // 初始化等级复选框
             const enabledLevels = config.enabledLevels || [];
-            for (let i=1; i<=8; i++) {
+            for (let i = 1; i <= 8; i++) {
                 const levelEl = document.getElementById(`level_${i}`);
-                if (levelEl) {
-                    levelEl.checked = enabledLevels.includes(i);
-                }
+                if (levelEl) levelEl.checked = enabledLevels.includes(i);
             }
 
-            // 初始化考试时间（转换为datetime-local格式）
+            // 初始化考试时间
             if (config.examStartTime) {
                 const dt = new Date(config.examStartTime);
-                // 格式：YYYY-MM-DDTHH:MM
-                const dtStr = dt.toISOString().slice(0, 16);
-                document.getElementById('examStartTimeInput').value = dtStr;
+                if (!isNaN(dt.getTime())) {
+                    const dtStr = dt.toISOString().slice(0, 16);
+                    document.getElementById('examStartTimeInput').value = dtStr;
+                }
             }
         }
 
-        // 保存系统配置
         function saveConfig() {
             // 获取选中的语言
             const enabledLangs = [];
             ['lang_cpp', 'lang_python', 'lang_java', 'lang_scratch'].forEach(id => {
                 const el = document.getElementById(id);
-                if (el.checked) enabledLangs.push(el.value);
+                if (el && el.checked) enabledLangs.push(el.value);
             });
             if (enabledLangs.length > 4) {
                 alert('最多只能启用4种语言！');
@@ -362,7 +446,7 @@
 
             // 获取选中的等级
             const enabledLevels = [];
-            for (let i=1; i<=8; i++) {
+            for (let i = 1; i <= 8; i++) {
                 const el = document.getElementById(`level_${i}`);
                 if (el && el.checked) enabledLevels.push(parseInt(el.value));
             }
@@ -373,7 +457,6 @@
                 alert('请选择考试开始时间！');
                 return;
             }
-            // 转换为YYYY-MM-DD HH:MM:SS格式
             const startTime = startTimeInput.replace('T', ' ') + ':00';
 
             // 更新配置
@@ -381,10 +464,18 @@
             config.enabledLevels = enabledLevels;
             config.examStartTime = startTime;
 
+            // 保存 GitHub 配置
+            const token = document.getElementById('githubToken').value.trim();
+            if (token && token !== 'ghp_your_token_here') {
+                localStorage.setItem('github_token', token);
+                githubConfig.token = token;
+            }
+            githubConfig.repo = document.getElementById('githubRepo').value.trim();
+            githubConfig.path = document.getElementById('githubPath').value.trim();
+
             alert('配置保存成功！请点击「导出配置」更新config.js文件');
         }
 
-        // 导出系统配置
         function exportConfig() {
             const jsContent = `window.ojConfig = ${JSON.stringify(config, null, 2)};`;
             const blob = new Blob([jsContent], { type: 'application/javascript' });
@@ -394,28 +485,157 @@
             a.download = 'config.js';
             a.click();
             URL.revokeObjectURL(url);
-            alert('✅ 配置文件导出成功！替换原config.js即可生效');
+            alert('✅ 配置文件导出成功！');
         }
 
-        // 切换题目表单（选择题/判断题）
+        // ==================== 限时规则相关（新增） ====================
+        function addTimeLimit() {
+            const startTime = document.getElementById('limitStartTime').value;
+            const endTime = document.getElementById('limitEndTime').value;
+            const language = document.getElementById('limitLanguage').value;
+            const level = document.getElementById('limitLevel').value;
+            const description = document.getElementById('limitDescription').value.trim() || '未命名规则';
+
+            if (!startTime || !endTime) {
+                alert('请填写完整的起止时间！');
+                return;
+            }
+
+            if (new Date(endTime) <= new Date(startTime)) {
+                alert('结束时间必须大于开始时间！');
+                return;
+            }
+
+            const newLimit = {
+                id: Date.now(),
+                startTime: startTime,
+                endTime: endTime,
+                language: language,
+                level: level,
+                description: description,
+                createdAt: new Date().toLocaleString()
+            };
+
+            timeLimits.push(newLimit);
+            localStorage.setItem('gesp_time_limits', JSON.stringify(timeLimits));
+            renderTimeLimitList();
+
+            // 清空表单
+            document.getElementById('limitStartTime').value = '';
+            document.getElementById('limitEndTime').value = '';
+            document.getElementById('limitLanguage').value = 'all';
+            document.getElementById('limitLevel').value = 'all';
+            document.getElementById('limitDescription').value = '';
+        }
+
+        function renderTimeLimitList() {
+            const container = document.getElementById('timeLimitList');
+            if (timeLimits.length === 0) {
+                container.innerHTML = '<div class="no-data">暂无限时规则</div>';
+                return;
+            }
+
+            // 按时间排序
+            timeLimits.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+
+            let html = '';
+            const now = new Date();
+
+            timeLimits.forEach(limit => {
+                const start = new Date(limit.startTime);
+                const end = new Date(limit.endTime);
+                
+                let status = 'pending';
+                let statusText = '未开始';
+                let statusClass = 'status-pending';
+
+                if (now >= start && now <= end) {
+                    status = 'active';
+                    statusText = '进行中';
+                    statusClass = 'status-active';
+                } else if (now > end) {
+                    status = 'expired';
+                    statusText = '已结束';
+                    statusClass = 'status-expired';
+                }
+
+                const languageText = limit.language === 'all' ? '所有语言' : limit.language;
+                const levelText = limit.level === 'all' ? '所有等级' : `${limit.level}级`;
+
+                html += `
+                    <div class="time-limit-item">
+                        <div class="time-limit-header">
+                            <h4>${limit.description}</h4>
+                            <span class="status-badge ${statusClass}">${statusText}</span>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin:10px 0;">
+                            <div><strong>开始时间：</strong>${limit.startTime.replace('T', ' ')}</div>
+                            <div><strong>结束时间：</strong>${limit.endTime.replace('T', ' ')}</div>
+                            <div><strong>适用语言：</strong>${languageText}</div>
+                            <div><strong>适用等级：</strong>${levelText}</div>
+                        </div>
+                        <div style="display:flex;gap:10px;justify-content:flex-end;">
+                            <button class="btn-warning" onclick="editTimeLimit(${limit.id})" style="width:auto;padding:5px 15px;">编辑</button>
+                            <button class="btn-danger" onclick="deleteTimeLimit(${limit.id})" style="width:auto;padding:5px 15px;">删除</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function deleteTimeLimit(id) {
+            if (!confirm('确定删除这条限时规则？')) return;
+            timeLimits = timeLimits.filter(limit => limit.id !== id);
+            localStorage.setItem('gesp_time_limits', JSON.stringify(timeLimits));
+            renderTimeLimitList();
+        }
+
+        function editTimeLimit(id) {
+            const limit = timeLimits.find(l => l.id === id);
+            if (!limit) return;
+
+            document.getElementById('limitStartTime').value = limit.startTime;
+            document.getElementById('limitEndTime').value = limit.endTime;
+            document.getElementById('limitLanguage').value = limit.language;
+            document.getElementById('limitLevel').value = limit.level;
+            document.getElementById('limitDescription').value = limit.description;
+
+            deleteTimeLimit(id); // 删除旧的，然后可以重新添加
+        }
+
+        function saveTimeLimits() {
+            // 将限时规则保存到 GitHub（作为 timeLimits.js）
+            const jsContent = `window.ojTimeLimits = ${JSON.stringify(timeLimits, null, 2)};`;
+            const blob = new Blob([jsContent], { type: 'application/javascript' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'timeLimits.js';
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            alert('✅ 限时规则已导出为 timeLimits.js，请上传到 GitHub');
+        }
+
+        function clearAllTimeLimits() {
+            if (!confirm('确定清空所有限时规则？')) return;
+            timeLimits = [];
+            localStorage.removeItem('gesp_time_limits');
+            renderTimeLimitList();
+        }
+
+        // ==================== 题目管理相关（带 GitHub 同步） ====================
         function toggleQuestionForm() {
             const qType = document.getElementById('qType').value;
             const optionsGroup = document.getElementById('optionsGroup');
-
-            if (qType === '选择题') {
-                optionsGroup.style.display = 'block';
-            } else {
-                optionsGroup.style.display = 'none';
-                document.getElementById('qCorrectAnswer').placeholder = '输入正确答案（正确/错误）';
-            }
+            optionsGroup.style.display = qType === '选择题' ? 'block' : 'none';
         }
 
-        // 添加选择题选项
         function addOption() {
             const optionsArea = document.getElementById('optionsArea');
             const optionCount = optionsArea.querySelectorAll('.option-input').length;
-
-            // 最多支持8个选项
             if (optionCount >= 8) {
                 alert('最多只能添加8个选项！');
                 return;
@@ -429,39 +649,210 @@
             `;
             optionsArea.appendChild(newOption);
 
-            // 显示已有选项的删除按钮
             optionsArea.querySelectorAll('.option-input button').forEach(btn => {
                 btn.style.display = 'block';
             });
         }
 
-        // 删除选择题选项
         function removeOption(el) {
             const optionsArea = document.getElementById('optionsArea');
             const optionCount = optionsArea.querySelectorAll('.option-input').length;
-
-            // 至少保留2个选项
             if (optionCount <= 2) {
                 alert('至少保留2个选项！');
                 return;
             }
-
             el.parentElement.remove();
-
-            // 重新编号选项提示
+            
             optionsArea.querySelectorAll('.option-input input').forEach((input, index) => {
                 input.placeholder = `选项${index+1}`;
             });
+        }
 
-            // 如果只剩2个选项，隐藏删除按钮
-            if (optionsArea.querySelectorAll('.option-input').length === 2) {
-                optionsArea.querySelectorAll('.option-input button').forEach(btn => {
-                    btn.style.display = 'none';
+        async function saveQuestion() {
+            const language = document.getElementById('qLanguage').value;
+            const level = parseInt(document.getElementById('qLevel').value);
+            const type = document.getElementById('qType').value;
+            const title = document.getElementById('qTitle').value.trim();
+            const desc = document.getElementById('qDesc').value.trim();
+            const correctAnswer = document.getElementById('qCorrectAnswer').value.trim();
+            const score = parseInt(document.getElementById('qScore').value);
+            const qId = parseInt(document.getElementById('qId').value || 0);
+
+            if (!title || !desc || !correctAnswer || isNaN(score) || score < 0) {
+                alert('请填写完整题目信息！');
+                return;
+            }
+
+            const question = {
+                language,
+                level,
+                id: qId || Date.now(),
+                title,
+                description: desc,
+                type,
+                correctAnswer,
+                score
+            };
+
+            if (type === '选择题') {
+                const options = [];
+                document.querySelectorAll('.option-text').forEach(input => {
+                    const val = input.value.trim();
+                    if (val) options.push(val);
                 });
+                if (options.length < 2) {
+                    alert('选择题至少需要2个选项！');
+                    return;
+                }
+                question.options = options;
+            }
+
+            // 更新本地数据
+            if (qId) {
+                const index = questions.findIndex(q => q.id === qId);
+                if (index !== -1) questions[index] = question;
+            } else {
+                questions.push(question);
+            }
+
+            window.ojQuestions = questions;
+            renderQuestionTable();
+            resetQuestionForm();
+
+            // 同步到 GitHub
+            await syncToGitHub();
+        }
+
+        async function syncToGitHub() {
+            const statusDiv = document.getElementById('githubSyncStatus');
+            const statusText = document.getElementById('syncStatusText');
+            
+            statusDiv.style.display = 'block';
+            statusText.innerHTML = '⏳ 正在同步到 GitHub...';
+            statusDiv.style.background = '#fff3cd';
+
+            try {
+                const token = document.getElementById('githubToken').value.trim();
+                if (!token || token === 'ghp_your_token_here') {
+                    throw new Error('请先在系统配置中填写 GitHub Token');
+                }
+
+                const repo = document.getElementById('githubRepo').value.trim();
+                const path = document.getElementById('githubPath').value.trim();
+                const owner = 'xxy150310git'; // 你的用户名
+
+                // 生成新的文件内容
+                const newContent = `window.ojQuestions = ${JSON.stringify(questions, null, 2)};`;
+                
+                // 获取当前文件的 SHA
+                const getUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+                const getResponse = await fetch(getUrl, {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                let sha = '';
+                if (getResponse.ok) {
+                    const fileData = await getResponse.json();
+                    sha = fileData.sha;
+                }
+
+                // 准备上传数据
+                const content = btoa(unescape(encodeURIComponent(newContent)));
+                const putData = {
+                    message: '更新题目 - ' + new Date().toLocaleString(),
+                    content: content,
+                    branch: 'main'
+                };
+                if (sha) putData.sha = sha;
+
+                // 上传到 GitHub
+                const putUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+                const putResponse = await fetch(putUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(putData)
+                });
+
+                if (!putResponse.ok) {
+                    const error = await putResponse.json();
+                    throw new Error(error.message || '同步失败');
+                }
+
+                statusText.innerHTML = '✅ 同步成功！题目已保存到 GitHub';
+                statusDiv.style.background = '#d4edda';
+                
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 3000);
+
+            } catch (error) {
+                statusText.innerHTML = `❌ 同步失败：${error.message}`;
+                statusDiv.style.background = '#f8d7da';
+                console.error('GitHub 同步错误:', error);
             }
         }
 
-        // 加载题目
+        async function syncFromGitHub() {
+            if (!confirm('从 GitHub 重新加载题目会覆盖当前未保存的修改，确定吗？')) return;
+
+            const statusDiv = document.getElementById('githubSyncStatus');
+            const statusText = document.getElementById('syncStatusText');
+            
+            statusDiv.style.display = 'block';
+            statusText.innerHTML = '⏳ 正在从 GitHub 加载题目...';
+            statusDiv.style.background = '#fff3cd';
+
+            try {
+                const token = document.getElementById('githubToken').value.trim();
+                if (!token || token === 'ghp_your_token_here') {
+                    throw new Error('请先在系统配置中填写 GitHub Token');
+                }
+
+                const repo = document.getElementById('githubRepo').value.trim();
+                const path = document.getElementById('githubPath').value.trim();
+                const owner = 'xxy150310git';
+
+                const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('获取文件失败');
+                }
+
+                const fileData = await response.json();
+                const content = decodeURIComponent(escape(atob(fileData.content)));
+                
+                // 解析题目
+                const match = content.match(/window\.ojQuestions\s*=\s*(\[.*?\]);/s);
+                if (match) {
+                    questions = eval('(' + match[1] + ')');
+                    window.ojQuestions = questions;
+                    renderQuestionTable();
+                    
+                    statusText.innerHTML = '✅ 加载成功！';
+                    statusDiv.style.background = '#d4edda';
+                } else {
+                    throw new Error('无法解析题目数据');
+                }
+
+            } catch (error) {
+                statusText.innerHTML = `❌ 加载失败：${error.message}`;
+                statusDiv.style.background = '#f8d7da';
+            }
+        }
+
         function loadQuestions() {
             loadScript('questions.js', () => {
                 questions = window.ojQuestions || [];
@@ -469,7 +860,6 @@
             });
         }
 
-        // 渲染题目表格
         function renderQuestionTable() {
             const tbody = document.getElementById('questionTableBody');
             if (questions.length === 0) {
@@ -495,12 +885,10 @@
             });
         }
 
-        // 编辑题目
         function editQuestion(questionId) {
             const q = questions.find(item => item.id === questionId);
             if (!q) return;
 
-            // 填充基础信息
             document.getElementById('qLanguage').value = q.language;
             document.getElementById('qLevel').value = q.level;
             document.getElementById('qType').value = q.type;
@@ -510,16 +898,11 @@
             document.getElementById('qScore').value = q.score;
             document.getElementById('qId').value = q.id;
 
-            // 切换表单显示
             toggleQuestionForm();
 
-            // 如果是选择题，填充选项
             if (q.type === '选择题' && q.options) {
                 const optionsArea = document.getElementById('optionsArea');
-                // 清空现有选项
                 optionsArea.innerHTML = '';
-
-                // 添加题目选项
                 q.options.forEach((option, index) => {
                     const newOption = document.createElement('div');
                     newOption.className = 'option-input';
@@ -532,80 +915,15 @@
             }
         }
 
-        // 保存题目（仅选择/判断题）
-        function saveQuestion() {
-            const language = document.getElementById('qLanguage').value;
-            const level = parseInt(document.getElementById('qLevel').value);
-            const type = document.getElementById('qType').value;
-            const title = document.getElementById('qTitle').value.trim();
-            const desc = document.getElementById('qDesc').value.trim();
-            const correctAnswer = document.getElementById('qCorrectAnswer').value.trim();
-            const score = parseInt(document.getElementById('qScore').value);
-            const qId = parseInt(document.getElementById('qId').value || 0);
-
-            // 验证必填项
-            if (!title || !desc || !correctAnswer || isNaN(score) || score < 0) {
-                alert('请填写完整题目信息，分值必须为非负数！');
-                return;
-            }
-
-            // 构建题目数据
-            const question = {
-                language,
-                level,
-                id: qId || Date.now(), // 新题目用时间戳作为ID
-                title,
-                description: desc,
-                type,
-                correctAnswer,
-                score
-            };
-
-            // 如果是选择题，添加选项
-            if (type === '选择题') {
-                const options = [];
-                document.querySelectorAll('.option-text').forEach(input => {
-                    const val = input.value.trim();
-                    val && options.push(val);
-                });
-
-                if (options.length < 2) {
-                    alert('选择题至少需要2个选项！');
-                    return;
-                }
-                question.options = options;
-            }
-
-            // 更新或新增题目
-            if (qId) {
-                const index = questions.findIndex(item => item.id === qId);
-                if (index !== -1) questions[index] = question;
-            } else {
-                questions.push(question);
-            }
-
-            // 保存到全局并渲染
-            window.ojQuestions = questions;
-            renderQuestionTable();
-            resetQuestionForm();
-
-            // 导出题目文件
-            exportQuestions();
-            alert('题目保存成功！');
-        }
-
-        // 删除题目
-        function delQuestion(questionId) {
+        async function delQuestion(questionId) {
             if (!confirm('确定删除该题目？')) return;
 
             questions = questions.filter(q => q.id !== questionId);
             window.ojQuestions = questions;
             renderQuestionTable();
-            exportQuestions();
-            alert('题目删除成功！');
+            await syncToGitHub();
         }
 
-        // 重置题目表单
         function resetQuestionForm() {
             document.getElementById('qLanguage').value = 'C++';
             document.getElementById('qLevel').value = 1;
@@ -616,7 +934,6 @@
             document.getElementById('qScore').value = '';
             document.getElementById('qId').value = '';
 
-            // 重置选项区域
             const optionsArea = document.getElementById('optionsArea');
             optionsArea.innerHTML = `
                 <div class="option-input">
@@ -631,19 +948,7 @@
             toggleQuestionForm();
         }
 
-        // 导出题目文件
-        function exportQuestions() {
-            const jsContent = `window.ojQuestions = ${JSON.stringify(questions, null, 2)};`;
-            const blob = new Blob([jsContent], { type: 'application/javascript' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'questions.js';
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        // 加载答案
+        // ==================== 答案管理相关 ====================
         function loadAnswers() {
             loadScript('answers.js', () => {
                 answers = window.ojAnswers || [];
@@ -651,7 +956,6 @@
             });
         }
 
-        // 渲染答案表格
         function renderAnswerTable() {
             const tbody = document.getElementById('answerTableBody');
             if (answers.length === 0) {
@@ -676,12 +980,11 @@
             });
         }
 
-        // 导入答案文件
         function importAnswerFile(files) {
             if (!files || files.length === 0) return;
 
             const file = files[0];
-            if (file.type !== 'application/javascript' && !file.name.endsWith('.js')) {
+            if (!file.name.endsWith('.js')) {
                 alert('请上传JS格式的答案文件！');
                 return;
             }
@@ -689,28 +992,20 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    // 解析JS内容，提取答案数据
-                    const content = e.target.result;
-                    // 执行JS内容（安全可控，仅管理员操作）
                     const script = document.createElement('script');
-                    script.text = content;
+                    script.text = e.target.result;
                     document.body.appendChild(script);
 
-                    // 获取解析后的答案
                     const userAnswer = window.ojUserAnswer;
                     if (!userAnswer || !userAnswer.username) {
                         alert('答案文件格式错误！');
                         return;
                     }
 
-                    // 添加到答案列表
                     answers.push(userAnswer);
                     window.ojAnswers = answers;
-
-                    // 保存并渲染
                     exportAnswers();
                     renderAnswerTable();
-
                     alert(`✅ 成功导入${userAnswer.username}的答案！`);
                 } catch (err) {
                     alert('导入失败：' + err.message);
@@ -719,7 +1014,6 @@
             reader.readAsText(file);
         }
 
-        // 查看答案详情
         function viewAnswer(index) {
             const ans = answers[index];
             if (!ans) return;
@@ -730,11 +1024,10 @@
                 <div><strong>考试等级：</strong>${ans.level}级</div>
                 <div><strong>提交时间：</strong>${ans.submitTime}</div>
                 <div><strong>总题数：</strong>${ans.totalQuestions}</div>
-                <div><strong>得分：</strong>${ans.score}</div>
+                <div><strong>得分：</strong>${ans.score || 0}</div>
                 <div style="margin-top:15px;"><strong>答题详情：</strong></div>
             `;
 
-            // 渲染每道题的答案
             for (const [qId, answer] of Object.entries(ans.answers)) {
                 detailHtml += `
                     <div style="margin:10px 0;padding:10px;background:#f8f9fa;">
@@ -748,18 +1041,14 @@
             document.getElementById('answerDetail').style.display = 'block';
         }
 
-        // 删除答案
         function delAnswer(index) {
             if (!confirm('确定删除该答案？')) return;
-
             answers.splice(index, 1);
             window.ojAnswers = answers;
             renderAnswerTable();
             exportAnswers();
-            alert('答案删除成功！');
         }
 
-        // 导出答案文件
         function exportAnswers() {
             const jsContent = `window.ojAnswers = ${JSON.stringify(answers, null, 2)};`;
             const blob = new Blob([jsContent], { type: 'application/javascript' });
@@ -771,7 +1060,27 @@
             URL.revokeObjectURL(url);
         }
 
-        // 通用加载JS文件方法
+        // ==================== 通用工具函数 ====================
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-nav button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+            currentTab = tabId;
+
+            if (tabId === 'questionTab') {
+                loadQuestions();
+                toggleQuestionForm();
+            }
+            if (tabId === 'answerTab') loadAnswers();
+            if (tabId === 'timeLimitTab') renderTimeLimitList();
+        }
+
         function loadScript(src, callback) {
             const oldScripts = document.querySelectorAll(`script[src*="${src}"]`);
             oldScripts.forEach(script => script.remove());
