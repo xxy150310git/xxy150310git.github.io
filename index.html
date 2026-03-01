@@ -19,6 +19,15 @@
         /* 倒计时样式 */
         .countdown {margin:20px 0;font-size:24px;color:#e63946;font-weight:bold;}
         .countdown .disabled {color:#999;font-weight:normal;}
+        /* 限时提示样式 */
+        .time-limit-info {background:#e3f2fd;padding:15px;border-radius:8px;margin:20px auto;width:80%;text-align:left;}
+        .time-limit-info h3 {color:#1976d2;margin-bottom:10px;}
+        .time-limit-info ul {list-style:none;padding-left:0;}
+        .time-limit-info li {padding:8px;border-bottom:1px solid #bbdefb;}
+        .time-limit-info li:last-child {border-bottom:none;}
+        .time-limit-info .active {color:#2e7d32;font-weight:bold;}
+        .time-limit-info .expired {color:#c62828;}
+        .time-limit-info .pending {color:#f57c00;}
         /* 按钮样式 */
         .enter-btn {padding:15px 40px;background:#007bff;color:#fff;border:none;border-radius:6px;font-size:18px;cursor:pointer;margin-top:20px;}
         .enter-btn:disabled {background:#6c757d;cursor:not-allowed;}
@@ -37,6 +46,12 @@
         <!-- 语言/等级选择区域 -->
         <div class="select-area">
             <h2>GESP等级认证 - 考试入口</h2>
+
+            <!-- 限时规则显示 -->
+            <div class="time-limit-info" id="timeLimitInfo">
+                <h3>⏰ 考试时间安排</h3>
+                <div id="timeLimitList">加载时间安排中...</div>
+            </div>
 
             <div class="form-group">
                 <label for="languageSelect">选择考试语言：</label>
@@ -75,65 +90,212 @@
     </div>
 
     <script>
-        // 全局变量
+        // ==================== 全局变量 ====================
+        let config = {};
+        let timeLimits = []; // 限时规则
         let examStartTime = null;
         let countdownTimer = null;
+        let currentLanguage = '';
+        let currentLevel = 0;
 
-        // 加载配置并初始化页面
+        // ==================== 初始化页面 ====================
         function initPage() {
-            // 加载全局配置
+            // 加载系统配置
             loadScript('config.js', () => {
-                const config = window.ojConfig || {};
-
+                config = window.ojConfig || {};
+                
                 // 初始化语言选择框
-                const langSelect = document.getElementById('languageSelect');
-                langSelect.innerHTML = '';
-                const enabledLangs = config.enabledLanguages || [];
-                if (enabledLangs.length === 0) {
-                    langSelect.innerHTML = '<option value="">暂无可用语言</option>';
-                } else {
-                    enabledLangs.forEach(lang => {
-                        langSelect.innerHTML += `<option value="${lang}">${lang}</option>`;
-                    });
-                }
-
+                initLanguageSelect();
+                
                 // 初始化等级选择框
-                const levelSelect = document.getElementById('levelSelect');
-                levelSelect.innerHTML = '';
-                const enabledLevels = config.enabledLevels || [];
-                if (enabledLevels.length === 0) {
-                    levelSelect.innerHTML = '<option value="">暂无可用等级</option>';
-                } else {
-                    enabledLevels.forEach(level => {
-                        levelSelect.innerHTML += `<option value="${level}">${level}级</option>`;
-                    });
-                }
-
+                initLevelSelect();
+                
+                // 启用输入框
+                document.getElementById('languageSelect').disabled = false;
+                document.getElementById('levelSelect').disabled = false;
+                document.getElementById('usernameInput').disabled = false;
+                
                 // 初始化考试开始时间
                 examStartTime = new Date(config.examStartTime || new Date().toString());
-
-                // 启用选择框和输入框
-                langSelect.disabled = false;
-                levelSelect.disabled = false;
-                document.getElementById('usernameInput').disabled = false;
-
+                
                 // 启动倒计时
                 startCountdown();
-
+                
                 // 监听按钮点击
                 document.getElementById('enterBtn').addEventListener('click', enterExam);
+                
+                // 监听语言和等级变化
+                document.getElementById('languageSelect').addEventListener('change', checkTimeLimit);
+                document.getElementById('levelSelect').addEventListener('change', checkTimeLimit);
+            });
+
+            // 加载限时规则
+            loadTimeLimits();
+        }
+
+        // ==================== 初始化下拉框 ====================
+        function initLanguageSelect() {
+            const langSelect = document.getElementById('languageSelect');
+            langSelect.innerHTML = '';
+            const enabledLangs = config.enabledLanguages || [];
+            
+            if (enabledLangs.length === 0) {
+                langSelect.innerHTML = '<option value="">暂无可用语言</option>';
+            } else {
+                enabledLangs.forEach(lang => {
+                    langSelect.innerHTML += `<option value="${lang}">${lang}</option>`;
+                });
+            }
+        }
+
+        function initLevelSelect() {
+            const levelSelect = document.getElementById('levelSelect');
+            levelSelect.innerHTML = '';
+            const enabledLevels = config.enabledLevels || [];
+            
+            if (enabledLevels.length === 0) {
+                levelSelect.innerHTML = '<option value="">暂无可用等级</option>';
+            } else {
+                enabledLevels.sort((a, b) => a - b);
+                enabledLevels.forEach(level => {
+                    levelSelect.innerHTML += `<option value="${level}">${level}级</option>`;
+                });
+            }
+        }
+
+        // ==================== 限时规则相关 ====================
+        function loadTimeLimits() {
+            // 先尝试加载 timeLimits.js
+            loadScript('timeLimits.js', () => {
+                timeLimits = window.ojTimeLimits || [];
+                renderTimeLimits();
+                checkTimeLimit();
+            }, () => {
+                // 如果 timeLimits.js 不存在，使用空数组
+                timeLimits = [];
+                renderTimeLimits();
             });
         }
 
-        // 启动考试倒计时
+        function renderTimeLimits() {
+            const container = document.getElementById('timeLimitList');
+            
+            if (timeLimits.length === 0) {
+                container.innerHTML = '<p>暂无特殊限时规则，以系统倒计时为准</p>';
+                return;
+            }
+
+            // 按时间排序
+            timeLimits.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+            
+            let html = '<ul>';
+            const now = new Date();
+            
+            timeLimits.forEach(limit => {
+                const start = new Date(limit.startTime);
+                const end = new Date(limit.endTime);
+                
+                let status = 'pending';
+                let statusText = '未开始';
+                let statusClass = 'pending';
+                
+                if (now >= start && now <= end) {
+                    status = 'active';
+                    statusText = '进行中';
+                    statusClass = 'active';
+                } else if (now > end) {
+                    status = 'expired';
+                    statusText = '已结束';
+                    statusClass = 'expired';
+                }
+                
+                const languageText = limit.language === 'all' ? '全部语言' : limit.language;
+                const levelText = limit.level === 'all' ? '全部等级' : `${limit.level}级`;
+                
+                html += `
+                    <li class="${statusClass}">
+                        <strong>${limit.description}</strong><br>
+                        ${limit.startTime.replace('T', ' ')} 至 ${limit.endTime.replace('T', ' ')}<br>
+                        适用：${languageText}，${levelText} (${statusText})
+                    </li>
+                `;
+            });
+            
+            html += '</ul>';
+            container.innerHTML = html;
+        }
+
+        function checkTimeLimit() {
+            const language = document.getElementById('languageSelect').value;
+            const level = document.getElementById('levelSelect').value;
+            const enterBtn = document.getElementById('enterBtn');
+            
+            if (!language || !level) return;
+            
+            const now = new Date();
+            let canEnter = false;
+            let message = '';
+
+            // 检查是否有匹配的限时规则
+            const matchingLimits = timeLimits.filter(limit => {
+                const langMatch = limit.language === 'all' || limit.language === language;
+                const levelMatch = limit.level === 'all' || parseInt(limit.level) === parseInt(level);
+                return langMatch && levelMatch;
+            });
+
+            if (matchingLimits.length > 0) {
+                // 有专门的限时规则
+                for (const limit of matchingLimits) {
+                    const start = new Date(limit.startTime);
+                    const end = new Date(limit.endTime);
+                    
+                    if (now >= start && now <= end) {
+                        canEnter = true;
+                        message = `✅ 当前在考试时间内：${limit.description}`;
+                        break;
+                    }
+                }
+                
+                if (!canEnter) {
+                    message = '❌ 当前不在该语言/等级的考试时间内';
+                }
+            } else {
+                // 没有专门的限时规则，使用系统倒计时
+                const diff = examStartTime - now;
+                if (diff <= 0) {
+                    canEnter = true;
+                    message = '✅ 系统考试已开始';
+                } else {
+                    message = '⏳ 等待系统考试开始';
+                }
+            }
+
+            // 更新按钮状态
+            enterBtn.disabled = !canEnter;
+            
+            // 显示提示信息（可以在页面上加一个提示区域）
+            let tipDiv = document.getElementById('timeLimitTip');
+            if (!tipDiv) {
+                tipDiv = document.createElement('div');
+                tipDiv.id = 'timeLimitTip';
+                tipDiv.style.margin = '10px auto';
+                tipDiv.style.padding = '10px';
+                tipDiv.style.borderRadius = '4px';
+                tipDiv.style.width = '80%';
+                document.querySelector('.select-area').insertBefore(tipDiv, document.getElementById('enterBtn'));
+            }
+            
+            tipDiv.innerHTML = message;
+            tipDiv.style.background = canEnter ? '#d4edda' : '#f8d7da';
+            tipDiv.style.color = canEnter ? '#155724' : '#721c24';
+        }
+
+        // ==================== 倒计时 ====================
         function startCountdown() {
             const countdownEl = document.getElementById('countdown');
             const enterBtn = document.getElementById('enterBtn');
 
-            // 立即执行一次倒计时更新
             updateCountdown();
-
-            // 每秒更新一次
             countdownTimer = setInterval(updateCountdown, 1000);
 
             function updateCountdown() {
@@ -141,22 +303,20 @@
                 const diff = examStartTime - now;
 
                 if (diff <= 0) {
-                    // 考试已开始
                     countdownEl.innerHTML = '✅ 考试已开始！可以进入答题';
-                    enterBtn.disabled = false;
+                    // 如果还没有限时规则允许，这里不禁用按钮
+                    // 按钮状态由 checkTimeLimit 控制
                     clearInterval(countdownTimer);
                 } else {
-                    // 计算时分秒
                     const hours = Math.floor(diff / (1000 * 60 * 60));
                     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                     const seconds = Math.floor((diff % (1000 * 60)) / 1000);
                     countdownEl.innerHTML = `考试开始倒计时：${hours}小时${minutes}分${seconds}秒`;
-                    enterBtn.disabled = true;
                 }
             }
         }
 
-        // 进入答题页
+        // ==================== 进入考试 ====================
         function enterExam() {
             const username = document.getElementById('usernameInput').value.trim();
             const language = document.getElementById('languageSelect').value;
@@ -175,13 +335,41 @@
                 return;
             }
 
-            // 跳转到答题页，并传递参数
+            // 再次检查限时（防止在点击前刚刚过期）
+            const now = new Date();
+            let canEnter = false;
+            
+            const matchingLimits = timeLimits.filter(limit => {
+                const langMatch = limit.language === 'all' || limit.language === language;
+                const levelMatch = limit.level === 'all' || parseInt(limit.level) === parseInt(level);
+                return langMatch && levelMatch;
+            });
+
+            if (matchingLimits.length > 0) {
+                for (const limit of matchingLimits) {
+                    const start = new Date(limit.startTime);
+                    const end = new Date(limit.endTime);
+                    if (now >= start && now <= end) {
+                        canEnter = true;
+                        break;
+                    }
+                }
+            } else {
+                canEnter = now >= examStartTime;
+            }
+
+            if (!canEnter) {
+                alert('当前不在考试时间内，无法进入！');
+                return;
+            }
+
+            // 跳转到答题页
             const examUrl = `exam.html?username=${encodeURIComponent(username)}&language=${encodeURIComponent(language)}&level=${encodeURIComponent(level)}`;
             window.location.href = examUrl;
         }
 
-        // 通用加载JS文件方法
-        function loadScript(src, callback) {
+        // ==================== 通用工具 ====================
+        function loadScript(src, callback, errorCallback) {
             const oldScripts = document.querySelectorAll(`script[src*="${src}"]`);
             oldScripts.forEach(script => script.remove());
 
@@ -190,7 +378,13 @@
             script.type = 'text/javascript';
             script.charset = 'UTF-8';
             script.onload = callback;
-            script.onerror = () => alert(`加载${src}失败！请检查文件是否存在`);
+            script.onerror = () => {
+                if (errorCallback) {
+                    errorCallback();
+                } else {
+                    console.log(`加载${src}失败，可能文件不存在`);
+                }
+            };
             document.body.appendChild(script);
         }
 
