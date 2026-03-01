@@ -11,8 +11,12 @@
         .exam-header {border-bottom:1px solid #eee;padding-bottom:20px;margin-bottom:20px;text-align:center;}
         .exam-header h2 {color:#333;margin-bottom:10px;}
         .exam-info {font-size:16px;color:#666;margin:5px 0;}
+        /* 限时提示 */
+        .time-warning {background:#fff3cd;padding:15px;border-radius:6px;margin:20px 0;text-align:center;color:#856404;border:1px solid #ffeeba;}
+        .time-warning.expired {background:#f8d7da;color:#721c24;border-color:#f5c6cb;}
+        .time-warning .countdown-timer {font-size:24px;font-weight:bold;margin-top:10px;}
         /* 编程题提示 */
-        .luogu-tips {background:#fff3cd;padding:15px;border-radius:6px;margin:20px 0;text-align:center;color:#856404;border:1px solid #ffeeba;}
+        .luogu-tips {background:#e7f3ff;padding:15px;border-radius:6px;margin:20px 0;text-align:center;color:#004085;border:1px solid #b8daff;}
         .luogu-tips a {color:#007bff;text-decoration:none;}
         .luogu-tips a:hover {text-decoration:underline;}
         /* 题目区域 */
@@ -33,6 +37,7 @@
         .btn-group {text-align:center;margin:30px 0;}
         .export-btn {padding:12px 30px;background:#28a745;color:#fff;border:none;border-radius:6px;font-size:16px;cursor:pointer;margin:0 10px;}
         .export-btn:hover {background:#218838;}
+        .export-btn:disabled {background:#6c757d;cursor:not-allowed;}
         .back-btn {padding:12px 30px;background:#6c757d;color:#fff;border:none;border-radius:6px;font-size:16px;cursor:pointer;margin:0 10px;}
         .back-btn:hover {background:#5a6268;}
         .no-questions {text-align:center;color:#999;font-size:18px;padding:50px 0;}
@@ -44,6 +49,12 @@
         <div class="exam-header">
             <h2>GESP等级认证答题页</h2>
             <div class="exam-info" id="examInfo">加载考试信息中...</div>
+        </div>
+
+        <!-- 限时警告 -->
+        <div class="time-warning" id="timeWarning">
+            <div id="timeWarningMessage">检查考试时间...</div>
+            <div class="countdown-timer" id="countdownTimer"></div>
         </div>
 
         <!-- 编程题提示（跳转到洛谷） -->
@@ -64,14 +75,18 @@
     </div>
 
     <script>
-        // 全局变量
+        // ==================== 全局变量 ====================
         let username = '';
         let language = '';
         let level = 0;
         let questions = [];
-        let answers = {}; // 存储用户答案：{题ID: 答案内容}
+        let answers = {};
+        let timeLimits = [];
+        let examEndTime = null;
+        let countdownTimer = null;
+        let isExamActive = true;
 
-        // 初始化答题页
+        // ==================== 初始化答题页 ====================
         function initExam() {
             // 解析URL参数
             const params = new URLSearchParams(window.location.search);
@@ -90,23 +105,127 @@
                 考生姓名：${username} | 考试语言：${language} | 考试等级：${level}级
             `;
 
+            // 加载限时规则
+            loadTimeLimits();
+
             // 加载题目
             loadScript('questions.js', () => {
-                // 筛选对应语言+等级的题目（仅选择/判断题）
                 questions = (window.ojQuestions || []).filter(q =>
                     q.language === language && q.level === level &&
                     (q.type === "选择题" || q.type === "判断题")
                 );
-
-                // 渲染题目
                 renderQuestions();
+            });
 
-                // 绑定导出按钮事件
-                document.getElementById('exportBtn').addEventListener('click', exportAnswers);
+            // 绑定导出按钮事件
+            document.getElementById('exportBtn').addEventListener('click', exportAnswers);
+        }
+
+        // ==================== 限时规则相关 ====================
+        function loadTimeLimits() {
+            loadScript('timeLimits.js', () => {
+                timeLimits = window.ojTimeLimits || [];
+                checkExamTime();
+                startCountdown();
+            }, () => {
+                // 没有限时规则，默认一直可用
+                timeLimits = [];
+                isExamActive = true;
+                document.getElementById('timeWarning').classList.remove('expired');
+                document.getElementById('timeWarningMessage').innerHTML = '✅ 无限时规则，可正常答题';
             });
         }
 
-        // 渲染题目（仅选择/判断题）
+        function checkExamTime() {
+            const now = new Date();
+            
+            // 查找匹配的限时规则
+            const matchingLimits = timeLimits.filter(limit => {
+                const langMatch = limit.language === 'all' || limit.language === language;
+                const levelMatch = limit.level === 'all' || parseInt(limit.level) === level;
+                return langMatch && levelMatch;
+            });
+
+            if (matchingLimits.length === 0) {
+                // 没有匹配的规则，默认可用
+                isExamActive = true;
+                examEndTime = null;
+                document.getElementById('timeWarning').classList.remove('expired');
+                document.getElementById('timeWarningMessage').innerHTML = '✅ 无限时规则，可正常答题';
+                return;
+            }
+
+            // 找到当前时间所在的规则
+            let activeLimit = null;
+            for (const limit of matchingLimits) {
+                const start = new Date(limit.startTime);
+                const end = new Date(limit.endTime);
+                if (now >= start && now <= end) {
+                    activeLimit = limit;
+                    examEndTime = end;
+                    break;
+                }
+            }
+
+            if (activeLimit) {
+                // 在考试时间内
+                isExamActive = true;
+                document.getElementById('timeWarning').classList.remove('expired');
+                document.getElementById('timeWarningMessage').innerHTML = `
+                    ✅ 考试进行中 - ${activeLimit.description}<br>
+                    结束时间：${activeLimit.endTime.replace('T', ' ')}
+                `;
+            } else {
+                // 不在考试时间内
+                isExamActive = false;
+                examEndTime = null;
+                document.getElementById('timeWarning').classList.add('expired');
+                document.getElementById('timeWarningMessage').innerHTML = '⛔ 当前不在考试时间内，无法提交答案';
+                
+                // 禁用答题和导出按钮
+                disableExam();
+            }
+        }
+
+        function startCountdown() {
+            if (!examEndTime) return;
+            
+            countdownTimer = setInterval(() => {
+                const now = new Date();
+                const end = new Date(examEndTime);
+                const diff = end - now;
+
+                if (diff <= 0) {
+                    // 考试结束
+                    isExamActive = false;
+                    document.getElementById('timeWarning').classList.add('expired');
+                    document.getElementById('timeWarningMessage').innerHTML = '⛔ 考试时间已结束';
+                    document.getElementById('countdownTimer').innerHTML = '';
+                    disableExam();
+                    clearInterval(countdownTimer);
+                } else {
+                    // 显示剩余时间
+                    const hours = Math.floor(diff / (1000 * 60 * 60));
+                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                    document.getElementById('countdownTimer').innerHTML = 
+                        `剩余时间：${hours}小时${minutes}分${seconds}秒`;
+                }
+            }, 1000);
+        }
+
+        function disableExam() {
+            // 禁用所有选项点击
+            document.querySelectorAll('.option-item, .judge-item').forEach(el => {
+                el.style.pointerEvents = 'none';
+                el.style.opacity = '0.6';
+            });
+            
+            // 禁用导出按钮
+            document.getElementById('exportBtn').disabled = true;
+        }
+
+        // ==================== 渲染题目 ====================
         function renderQuestions() {
             const questionArea = document.getElementById('questionArea');
 
@@ -115,13 +234,10 @@
                 return;
             }
 
-            // 清空答案存储
             answers = {};
 
-            // 渲染每道题
             let html = '';
             questions.forEach(question => {
-                // 初始化答案为空
                 answers[question.id] = '';
 
                 html += `
@@ -138,7 +254,6 @@
             questionArea.innerHTML = html;
         }
 
-        // 渲染选择题选项
         function renderOptions(question) {
             let optionsHtml = '';
             question.options.forEach(option => {
@@ -151,7 +266,6 @@
             return optionsHtml;
         }
 
-        // 渲染判断题选项
         function renderJudge(question) {
             return `
                 <div class="judge-options">
@@ -161,44 +275,51 @@
             `;
         }
 
-        // 选择选择题答案
+        // ==================== 选择答案 ====================
         function selectOption(questionId, option) {
-            // 清空该题的所有选中状态
+            if (!isExamActive) {
+                alert('考试已结束，不能修改答案');
+                return;
+            }
+            
             document.querySelectorAll(`.question-item[data-question-id="${questionId}"] .option-item`).forEach(item => {
                 item.classList.remove('selected');
             });
-            // 选中当前选项
             event.target.classList.add('selected');
-            // 保存答案
             answers[questionId] = option;
         }
 
-        // 选择判断题答案
         function selectJudge(questionId, answer) {
-            // 清空该题的所有选中状态
+            if (!isExamActive) {
+                alert('考试已结束，不能修改答案');
+                return;
+            }
+            
             document.querySelectorAll(`.question-item[data-question-id="${questionId}"] .judge-item`).forEach(item => {
                 item.classList.remove('selected');
             });
-            // 选中当前选项
             event.target.classList.add('selected');
-            // 保存答案
             answers[questionId] = answer;
         }
 
-        // 导出答案为JS文件
+        // ==================== 导出答案 ====================
         function exportAnswers() {
-            // 验证是否有答案
+            if (!isExamActive) {
+                alert('考试已结束，无法导出答案！');
+                return;
+            }
+
             let hasAnswer = false;
             Object.values(answers).forEach(ans => {
                 if (ans) hasAnswer = true;
             });
+            
             if (!hasAnswer) {
                 if (!confirm('尚未填写任何答案，是否仍要导出？')) {
                     return;
                 }
             }
 
-            // 构造答案数据
             const answerData = {
                 username: username,
                 language: language,
@@ -206,18 +327,15 @@
                 submitTime: new Date().toLocaleString(),
                 answers: answers,
                 totalQuestions: questions.length,
-                score: 0 // 管理员判分后填写
+                score: 0
             };
 
-            // 生成JS文件内容
             const jsContent = `window.ojUserAnswer = ${JSON.stringify(answerData, null, 2)};`;
 
-            // 创建下载链接
             const blob = new Blob([jsContent], { type: 'application/javascript' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            // 文件名格式：姓名_语言_等级_时间.js
             const timeStr = new Date().getTime();
             a.download = `${username}_${language}_${level}级_${timeStr}.js`;
             a.click();
@@ -226,8 +344,8 @@
             alert('✅ 答案文件导出成功！请将该JS文件提交给管理员');
         }
 
-        // 通用加载JS文件方法
-        function loadScript(src, callback) {
+        // ==================== 通用工具 ====================
+        function loadScript(src, callback, errorCallback) {
             const oldScripts = document.querySelectorAll(`script[src*="${src}"]`);
             oldScripts.forEach(script => script.remove());
 
@@ -236,7 +354,13 @@
             script.type = 'text/javascript';
             script.charset = 'UTF-8';
             script.onload = callback;
-            script.onerror = () => alert(`加载${src}失败！请检查文件是否存在`);
+            script.onerror = () => {
+                if (errorCallback) {
+                    errorCallback();
+                } else {
+                    console.log(`加载${src}失败，可能文件不存在`);
+                }
+            };
             document.body.appendChild(script);
         }
 
