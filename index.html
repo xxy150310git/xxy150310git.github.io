@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GESP等级认证OJ系统 - 封面</title>
+    <style>
+        * {margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
+        body {background:#f0f0f0;}
+        .cover-container {max-width:1200px;margin:0 auto;padding:20px;text-align:center;}
+        /* 海报样式 */
+        .poster {width:100%;max-width:800px;margin:0 auto;border-radius:8px;box-shadow:0 0 15px rgba(0,0,0,0.2);}
+        /* 选择区域 */
+        .select-area {margin:30px 0;padding:20px;background:#fff;border-radius:8px;box-shadow:0 0 10px rgba(0,0,0,0.1);}
+        .select-area h2 {color:#333;margin-bottom:20px;}
+        .form-group {margin:15px 0;}
+        .form-group label {display:block;font-size:18px;color:#555;margin-bottom:8px;text-align:left;width:80%;margin:0 auto 8px;}
+        .form-group select, .form-group input {width:80%;padding:12px;font-size:16px;border:1px solid #ddd;border-radius:4px;}
+        /* 倒计时样式 */
+        .countdown {margin:20px 0;font-size:24px;color:#e63946;font-weight:bold;}
+        .countdown .disabled {color:#999;font-weight:normal;}
+        /* 按钮样式 */
+        .enter-btn {padding:15px 40px;background:#007bff;color:#fff;border:none;border-radius:6px;font-size:18px;cursor:pointer;margin-top:20px;}
+        .enter-btn:disabled {background:#6c757d;cursor:not-allowed;}
+        .enter-btn:hover:not(:disabled) {background:#0056b3;}
+        /* 管理员入口 */
+        .admin-link {margin-top:30px;font-size:16px;}
+        .admin-link a {color:#007bff;text-decoration:none;}
+        .admin-link a:hover {text-decoration:underline;}
+    </style>
+</head>
+<body>
+    <div class="cover-container">
+        <!-- 展示指定海报 -->
+        <img src="https://cdn.luogu.com.cn/upload/image_hosting/mwkwi8zh.png" alt="GESP等级认证海报" class="poster">
+
+        <!-- 语言/等级选择区域 -->
+        <div class="select-area">
+            <h2>GESP等级认证 - 考试入口</h2>
+
+            <div class="form-group">
+                <label for="languageSelect">选择考试语言：</label>
+                <select id="languageSelect" disabled>
+                    <option value="">请等待配置加载...</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="levelSelect">选择考试等级：</label>
+                <select id="levelSelect" disabled>
+                    <option value="">请等待配置加载...</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="usernameInput">输入考生姓名：</label>
+                <input type="text" id="usernameInput" placeholder="请输入你的姓名" disabled>
+            </div>
+
+            <!-- 考试倒计时 -->
+            <div class="countdown" id="countdown">
+                考试开始倒计时：加载中...
+            </div>
+
+            <!-- 进入答题页按钮 -->
+            <button class="enter-btn" id="enterBtn" disabled>
+                进入考试
+            </button>
+        </div>
+
+        <!-- 管理员入口 -->
+        <div class="admin-link">
+            <a href="admin.html">管理员后台入口</a>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let examStartTime = null;
+        let countdownTimer = null;
+
+        // 加载配置并初始化页面
+        function initPage() {
+            // 加载全局配置
+            loadScript('config.js', () => {
+                const config = window.ojConfig || {};
+
+                // 初始化语言选择框
+                const langSelect = document.getElementById('languageSelect');
+                langSelect.innerHTML = '';
+                const enabledLangs = config.enabledLanguages || [];
+                if (enabledLangs.length === 0) {
+                    langSelect.innerHTML = '<option value="">暂无可用语言</option>';
+                } else {
+                    enabledLangs.forEach(lang => {
+                        langSelect.innerHTML += `<option value="${lang}">${lang}</option>`;
+                    });
+                }
+
+                // 初始化等级选择框
+                const levelSelect = document.getElementById('levelSelect');
+                levelSelect.innerHTML = '';
+                const enabledLevels = config.enabledLevels || [];
+                if (enabledLevels.length === 0) {
+                    levelSelect.innerHTML = '<option value="">暂无可用等级</option>';
+                } else {
+                    enabledLevels.forEach(level => {
+                        levelSelect.innerHTML += `<option value="${level}">${level}级</option>`;
+                    });
+                }
+
+                // 初始化考试开始时间
+                examStartTime = new Date(config.examStartTime || new Date().toString());
+
+                // 启用选择框和输入框
+                langSelect.disabled = false;
+                levelSelect.disabled = false;
+                document.getElementById('usernameInput').disabled = false;
+
+                // 启动倒计时
+                startCountdown();
+
+                // 监听按钮点击
+                document.getElementById('enterBtn').addEventListener('click', enterExam);
+            });
+        }
+
+        // 启动考试倒计时
+        function startCountdown() {
+            const countdownEl = document.getElementById('countdown');
+            const enterBtn = document.getElementById('enterBtn');
+
+            // 立即执行一次倒计时更新
+            updateCountdown();
+
+            // 每秒更新一次
+            countdownTimer = setInterval(updateCountdown, 1000);
+
+            function updateCountdown() {
+                const now = new Date();
+                const diff = examStartTime - now;
+
+                if (diff <= 0) {
+                    // 考试已开始
+                    countdownEl.innerHTML = '✅ 考试已开始！可以进入答题';
+                    enterBtn.disabled = false;
+                    clearInterval(countdownTimer);
+                } else {
+                    // 计算时分秒
+                    const hours = Math.floor(diff / (1000 * 60 * 60));
+                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                    countdownEl.innerHTML = `考试开始倒计时：${hours}小时${minutes}分${seconds}秒`;
+                    enterBtn.disabled = true;
+                }
+            }
+        }
+
+        // 进入答题页
+        function enterExam() {
+            const username = document.getElementById('usernameInput').value.trim();
+            const language = document.getElementById('languageSelect').value;
+            const level = document.getElementById('levelSelect').value;
+
+            if (!username) {
+                alert('请输入考生姓名！');
+                return;
+            }
+            if (!language) {
+                alert('请选择考试语言！');
+                return;
+            }
+            if (!level) {
+                alert('请选择考试等级！');
+                return;
+            }
+
+            // 跳转到答题页，并传递参数
+            const examUrl = `exam.html?username=${encodeURIComponent(username)}&language=${encodeURIComponent(language)}&level=${encodeURIComponent(level)}`;
+            window.location.href = examUrl;
+        }
+
+        // 通用加载JS文件方法
+        function loadScript(src, callback) {
+            const oldScripts = document.querySelectorAll(`script[src*="${src}"]`);
+            oldScripts.forEach(script => script.remove());
+
+            const script = document.createElement('script');
+            script.src = src + '?rand=' + Math.random();
+            script.type = 'text/javascript';
+            script.charset = 'UTF-8';
+            script.onload = callback;
+            script.onerror = () => alert(`加载${src}失败！请检查文件是否存在`);
+            document.body.appendChild(script);
+        }
+
+        // 页面加载时初始化
+        window.onload = initPage;
+    </script>
+</body>
+</html>

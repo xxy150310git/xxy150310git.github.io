@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GESP等级认证 - 答题页</title>
+    <style>
+        * {margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
+        body {background:#f0f0f0;padding:20px;}
+        .exam-container {max-width:1000px;margin:0 auto;background:#fff;padding:30px;border-radius:8px;box-shadow:0 0 10px rgba(0,0,0,0.1);}
+        .exam-header {border-bottom:1px solid #eee;padding-bottom:20px;margin-bottom:20px;text-align:center;}
+        .exam-header h2 {color:#333;margin-bottom:10px;}
+        .exam-info {font-size:16px;color:#666;margin:5px 0;}
+        /* 编程题提示 */
+        .luogu-tips {background:#fff3cd;padding:15px;border-radius:6px;margin:20px 0;text-align:center;color:#856404;border:1px solid #ffeeba;}
+        .luogu-tips a {color:#007bff;text-decoration:none;}
+        .luogu-tips a:hover {text-decoration:underline;}
+        /* 题目区域 */
+        .question-area {margin:30px 0;}
+        .question-item {margin-bottom:30px;padding:20px;border:1px solid #eee;border-radius:6px;background:#f8f9fa;}
+        .question-item h3 {color:#007bff;margin-bottom:10px;}
+        .question-desc {margin-bottom:15px;line-height:1.6;}
+        /* 选择题样式 */
+        .option-item {margin:10px 0;padding:8px;border:1px solid #ddd;border-radius:4px;cursor:pointer;}
+        .option-item:hover {background:#e9ecef;}
+        .option-item.selected {background:#007bff;color:#fff;border-color:#007bff;}
+        /* 判断题样式 */
+        .judge-options {display:flex;gap:20px;margin:10px 0;}
+        .judge-item {padding:10px 20px;border:1px solid #ddd;border-radius:4px;cursor:pointer;flex:1;text-align:center;}
+        .judge-item:hover {background:#e9ecef;}
+        .judge-item.selected {background:#007bff;color:#fff;border-color:#007bff;}
+        /* 按钮样式 */
+        .btn-group {text-align:center;margin:30px 0;}
+        .export-btn {padding:12px 30px;background:#28a745;color:#fff;border:none;border-radius:6px;font-size:16px;cursor:pointer;margin:0 10px;}
+        .export-btn:hover {background:#218838;}
+        .back-btn {padding:12px 30px;background:#6c757d;color:#fff;border:none;border-radius:6px;font-size:16px;cursor:pointer;margin:0 10px;}
+        .back-btn:hover {background:#5a6268;}
+        .no-questions {text-align:center;color:#999;font-size:18px;padding:50px 0;}
+    </style>
+</head>
+<body>
+    <div class="exam-container">
+        <!-- 考试信息头部 -->
+        <div class="exam-header">
+            <h2>GESP等级认证答题页</h2>
+            <div class="exam-info" id="examInfo">加载考试信息中...</div>
+        </div>
+
+        <!-- 编程题提示（跳转到洛谷） -->
+        <div class="luogu-tips">
+            <strong>提示：</strong>编程题请前往 <a href="https://www.luogu.com.cn/" target="_blank">洛谷OJ</a> 作答，本页面仅作答选择题和判断题！
+        </div>
+
+        <!-- 题目区域 -->
+        <div class="question-area" id="questionArea">
+            加载题目中...
+        </div>
+
+        <!-- 按钮组 -->
+        <div class="btn-group">
+            <button class="export-btn" id="exportBtn">导出答案（JS文件）</button>
+            <button class="back-btn" onclick="window.location.href='index.html'">返回封面</button>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let username = '';
+        let language = '';
+        let level = 0;
+        let questions = [];
+        let answers = {}; // 存储用户答案：{题ID: 答案内容}
+
+        // 初始化答题页
+        function initExam() {
+            // 解析URL参数
+            const params = new URLSearchParams(window.location.search);
+            username = decodeURIComponent(params.get('username') || '');
+            language = decodeURIComponent(params.get('language') || '');
+            level = parseInt(params.get('level') || 0);
+
+            if (!username || !language || isNaN(level)) {
+                alert('考试参数错误！请从封面页重新进入');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // 显示考试信息
+            document.getElementById('examInfo').innerHTML = `
+                考生姓名：${username} | 考试语言：${language} | 考试等级：${level}级
+            `;
+
+            // 加载题目
+            loadScript('questions.js', () => {
+                // 筛选对应语言+等级的题目（仅选择/判断题）
+                questions = (window.ojQuestions || []).filter(q =>
+                    q.language === language && q.level === level &&
+                    (q.type === "选择题" || q.type === "判断题")
+                );
+
+                // 渲染题目
+                renderQuestions();
+
+                // 绑定导出按钮事件
+                document.getElementById('exportBtn').addEventListener('click', exportAnswers);
+            });
+        }
+
+        // 渲染题目（仅选择/判断题）
+        function renderQuestions() {
+            const questionArea = document.getElementById('questionArea');
+
+            if (questions.length === 0) {
+                questionArea.innerHTML = '<div class="no-questions">暂无该语言/等级的选择/判断题</div>';
+                return;
+            }
+
+            // 清空答案存储
+            answers = {};
+
+            // 渲染每道题
+            let html = '';
+            questions.forEach(question => {
+                // 初始化答案为空
+                answers[question.id] = '';
+
+                html += `
+                    <div class="question-item" data-question-id="${question.id}">
+                        <h3>第${question.id}题（${question.score}分）：${question.title}</h3>
+                        <div class="question-desc">${question.description}</div>
+                        <div class="answer-area">
+                            ${question.type === "选择题" ? renderOptions(question) : renderJudge(question)}
+                        </div>
+                    </div>
+                `;
+            });
+
+            questionArea.innerHTML = html;
+        }
+
+        // 渲染选择题选项
+        function renderOptions(question) {
+            let optionsHtml = '';
+            question.options.forEach(option => {
+                optionsHtml += `
+                    <div class="option-item" onclick="selectOption(${question.id}, '${option.replace(/'/g, "\\'")}')">
+                        ${option}
+                    </div>
+                `;
+            });
+            return optionsHtml;
+        }
+
+        // 渲染判断题选项
+        function renderJudge(question) {
+            return `
+                <div class="judge-options">
+                    <div class="judge-item" onclick="selectJudge(${question.id}, '正确')">正确</div>
+                    <div class="judge-item" onclick="selectJudge(${question.id}, '错误')">错误</div>
+                </div>
+            `;
+        }
+
+        // 选择选择题答案
+        function selectOption(questionId, option) {
+            // 清空该题的所有选中状态
+            document.querySelectorAll(`.question-item[data-question-id="${questionId}"] .option-item`).forEach(item => {
+                item.classList.remove('selected');
+            });
+            // 选中当前选项
+            event.target.classList.add('selected');
+            // 保存答案
+            answers[questionId] = option;
+        }
+
+        // 选择判断题答案
+        function selectJudge(questionId, answer) {
+            // 清空该题的所有选中状态
+            document.querySelectorAll(`.question-item[data-question-id="${questionId}"] .judge-item`).forEach(item => {
+                item.classList.remove('selected');
+            });
+            // 选中当前选项
+            event.target.classList.add('selected');
+            // 保存答案
+            answers[questionId] = answer;
+        }
+
+        // 导出答案为JS文件
+        function exportAnswers() {
+            // 验证是否有答案
+            let hasAnswer = false;
+            Object.values(answers).forEach(ans => {
+                if (ans) hasAnswer = true;
+            });
+            if (!hasAnswer) {
+                if (!confirm('尚未填写任何答案，是否仍要导出？')) {
+                    return;
+                }
+            }
+
+            // 构造答案数据
+            const answerData = {
+                username: username,
+                language: language,
+                level: level,
+                submitTime: new Date().toLocaleString(),
+                answers: answers,
+                totalQuestions: questions.length,
+                score: 0 // 管理员判分后填写
+            };
+
+            // 生成JS文件内容
+            const jsContent = `window.ojUserAnswer = ${JSON.stringify(answerData, null, 2)};`;
+
+            // 创建下载链接
+            const blob = new Blob([jsContent], { type: 'application/javascript' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            // 文件名格式：姓名_语言_等级_时间.js
+            const timeStr = new Date().getTime();
+            a.download = `${username}_${language}_${level}级_${timeStr}.js`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            alert('✅ 答案文件导出成功！请将该JS文件提交给管理员');
+        }
+
+        // 通用加载JS文件方法
+        function loadScript(src, callback) {
+            const oldScripts = document.querySelectorAll(`script[src*="${src}"]`);
+            oldScripts.forEach(script => script.remove());
+
+            const script = document.createElement('script');
+            script.src = src + '?rand=' + Math.random();
+            script.type = 'text/javascript';
+            script.charset = 'UTF-8';
+            script.onload = callback;
+            script.onerror = () => alert(`加载${src}失败！请检查文件是否存在`);
+            document.body.appendChild(script);
+        }
+
+        // 页面加载时初始化
+        window.onload = initExam;
+    </script>
+</body>
+</html>
