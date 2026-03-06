@@ -3,9 +3,9 @@ window.ojConfig = {
     "C++"
   ],
   "enabledLevels": [
-    5,6
+    1,4
   ],
-  "examStartTime": "2026-02-01 17:40:00",
+  "examStartTime": "2026-03-07 07:00:00",
   "adminAccounts": [
     {
       "account": "xxy150310",
