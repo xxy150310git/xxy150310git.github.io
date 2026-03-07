@@ -301,17 +301,19 @@
             function updateCountdown() {
                 const now = new Date();
                 const diff = examStartTime - now;
-
+            
                 if (diff <= 0) {
                     countdownEl.innerHTML = '✅ 考试已开始！可以进入答题';
-                    // 如果还没有限时规则允许，这里不禁用按钮
-                    // 按钮状态由 checkTimeLimit 控制
+                    // 👇 强制启用按钮（不管限时规则）
+                    document.getElementById('enterBtn').disabled = false;
                     clearInterval(countdownTimer);
                 } else {
                     const hours = Math.floor(diff / (1000 * 60 * 60));
                     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                     const seconds = Math.floor((diff % (1000 * 60)) / 1000);
                     countdownEl.innerHTML = `考试开始倒计时：${hours}小时${minutes}分${seconds}秒`;
+                    // 👇 倒计时期间禁用按钮
+                    document.getElementById('enterBtn').disabled = true;
                 }
             }
         }
@@ -321,7 +323,7 @@
             const username = document.getElementById('usernameInput').value.trim();
             const language = document.getElementById('languageSelect').value;
             const level = document.getElementById('levelSelect').value;
-
+        
             if (!username) {
                 alert('请输入考生姓名！');
                 return;
@@ -334,36 +336,14 @@
                 alert('请选择考试等级！');
                 return;
             }
-
-            // 再次检查限时（防止在点击前刚刚过期）
-            const now = new Date();
-            let canEnter = false;
-            
-            const matchingLimits = timeLimits.filter(limit => {
-                const langMatch = limit.language === 'all' || limit.language === language;
-                const levelMatch = limit.level === 'all' || parseInt(limit.level) === parseInt(level);
-                return langMatch && levelMatch;
-            });
-
-            if (matchingLimits.length > 0) {
-                for (const limit of matchingLimits) {
-                    const start = new Date(limit.startTime);
-                    const end = new Date(limit.endTime);
-                    if (now >= start && now <= end) {
-                        canEnter = true;
-                        break;
-                    }
-                }
-            } else {
-                canEnter = now >= examStartTime;
-            }
-
-            if (!canEnter) {
-                alert('当前不在考试时间内，无法进入！');
-                return;
-            }
-
-            // 跳转到答题页
+        
+            // 👇 注释掉限时检查（直接用系统时间）
+            // const now = new Date();
+            // if (now < examStartTime) {
+            //     alert('考试还未开始！');
+            //     return;
+            // }
+        
             const examUrl = `exam.html?username=${encodeURIComponent(username)}&language=${encodeURIComponent(language)}&level=${encodeURIComponent(level)}`;
             window.location.href = examUrl;
         }
