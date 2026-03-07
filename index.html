@@ -92,11 +92,9 @@
     <script>
         // ==================== 全局变量 ====================
         let config = {};
-        let timeLimits = []; // 限时规则
+        let timeLimits = [];
         let examStartTime = null;
         let countdownTimer = null;
-        let currentLanguage = '';
-        let currentLevel = 0;
 
         // ==================== 初始化页面 ====================
         function initPage() {
@@ -104,32 +102,24 @@
             loadScript('config.js', () => {
                 config = window.ojConfig || {};
                 
-                // 初始化语言选择框
                 initLanguageSelect();
-                
-                // 初始化等级选择框
                 initLevelSelect();
                 
-                // 启用输入框
                 document.getElementById('languageSelect').disabled = false;
                 document.getElementById('levelSelect').disabled = false;
                 document.getElementById('usernameInput').disabled = false;
                 
-                // 初始化考试开始时间
                 examStartTime = new Date(config.examStartTime || new Date().toString());
                 
-                // 启动倒计时
                 startCountdown();
                 
-                // 监听按钮点击
+                // 绑定按钮点击事件
                 document.getElementById('enterBtn').addEventListener('click', enterExam);
                 
-                // 监听语言和等级变化
                 document.getElementById('languageSelect').addEventListener('change', checkTimeLimit);
                 document.getElementById('levelSelect').addEventListener('change', checkTimeLimit);
             });
 
-            // 加载限时规则
             loadTimeLimits();
         }
 
@@ -165,13 +155,11 @@
 
         // ==================== 限时规则相关 ====================
         function loadTimeLimits() {
-            // 先尝试加载 timeLimits.js
             loadScript('timeLimits.js', () => {
                 timeLimits = window.ojTimeLimits || [];
                 renderTimeLimits();
                 checkTimeLimit();
             }, () => {
-                // 如果 timeLimits.js 不存在，使用空数组
                 timeLimits = [];
                 renderTimeLimits();
             });
@@ -185,7 +173,6 @@
                 return;
             }
 
-            // 按时间排序
             timeLimits.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
             
             let html = '<ul>';
@@ -228,15 +215,13 @@
         function checkTimeLimit() {
             const language = document.getElementById('languageSelect').value;
             const level = document.getElementById('levelSelect').value;
-            const enterBtn = document.getElementById('enterBtn');
             
             if (!language || !level) return;
             
             const now = new Date();
-            let canEnter = false;
             let message = '';
 
-            // 检查是否有匹配的限时规则
+            // 只显示消息，不控制按钮（按钮由倒计时控制）
             const matchingLimits = timeLimits.filter(limit => {
                 const langMatch = limit.language === 'all' || limit.language === language;
                 const levelMatch = limit.level === 'all' || parseInt(limit.level) === parseInt(level);
@@ -244,36 +229,21 @@
             });
 
             if (matchingLimits.length > 0) {
-                // 有专门的限时规则
                 for (const limit of matchingLimits) {
                     const start = new Date(limit.startTime);
                     const end = new Date(limit.endTime);
-                    
                     if (now >= start && now <= end) {
-                        canEnter = true;
                         message = `✅ 当前在考试时间内：${limit.description}`;
                         break;
                     }
                 }
-                
-                if (!canEnter) {
-                    message = '❌ 当前不在该语言/等级的考试时间内';
-                }
+                if (!message) message = '❌ 当前不在该语言/等级的考试时间内';
             } else {
-                // 没有专门的限时规则，使用系统倒计时
                 const diff = examStartTime - now;
-                if (diff <= 0) {
-                    canEnter = true;
-                    message = '✅ 系统考试已开始';
-                } else {
-                    message = '⏳ 等待系统考试开始';
-                }
+                message = diff <= 0 ? '✅ 系统考试已开始' : '⏳ 等待系统考试开始';
             }
 
-            // 更新按钮状态
-            enterBtn.disabled = !canEnter;
-            
-            // 显示提示信息（可以在页面上加一个提示区域）
+            // 更新提示消息
             let tipDiv = document.getElementById('timeLimitTip');
             if (!tipDiv) {
                 tipDiv = document.createElement('div');
@@ -286,8 +256,8 @@
             }
             
             tipDiv.innerHTML = message;
-            tipDiv.style.background = canEnter ? '#d4edda' : '#f8d7da';
-            tipDiv.style.color = canEnter ? '#155724' : '#721c24';
+            tipDiv.style.background = message.includes('✅') ? '#d4edda' : '#f8d7da';
+            tipDiv.style.color = message.includes('✅') ? '#155724' : '#721c24';
         }
 
         // ==================== 倒计时 ====================
@@ -295,35 +265,39 @@
             const countdownEl = document.getElementById('countdown');
             const enterBtn = document.getElementById('enterBtn');
 
+            // 立即执行一次
             updateCountdown();
+            // 每秒更新
             countdownTimer = setInterval(updateCountdown, 1000);
 
             function updateCountdown() {
                 const now = new Date();
                 const diff = examStartTime - now;
-            
+
                 if (diff <= 0) {
                     countdownEl.innerHTML = '✅ 考试已开始！可以进入答题';
-                    // 👇 强制启用按钮（不管限时规则）
-                    document.getElementById('enterBtn').disabled = false;
+                    // ✅ 强制启用按钮
+                    enterBtn.disabled = false;
                     clearInterval(countdownTimer);
                 } else {
                     const hours = Math.floor(diff / (1000 * 60 * 60));
                     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                     const seconds = Math.floor((diff % (1000 * 60)) / 1000);
                     countdownEl.innerHTML = `考试开始倒计时：${hours}小时${minutes}分${seconds}秒`;
-                    // 👇 倒计时期间禁用按钮
-                    document.getElementById('enterBtn').disabled = true;
+                    // ✅ 倒计时期间禁用按钮
+                    enterBtn.disabled = true;
                 }
             }
         }
 
         // ==================== 进入考试 ====================
         function enterExam() {
+            console.log('enterExam 被执行');  // 调试用
+
             const username = document.getElementById('usernameInput').value.trim();
             const language = document.getElementById('languageSelect').value;
             const level = document.getElementById('levelSelect').value;
-        
+
             if (!username) {
                 alert('请输入考生姓名！');
                 return;
@@ -336,14 +310,8 @@
                 alert('请选择考试等级！');
                 return;
             }
-        
-            // 👇 注释掉限时检查（直接用系统时间）
-            // const now = new Date();
-            // if (now < examStartTime) {
-            //     alert('考试还未开始！');
-            //     return;
-            // }
-        
+
+            // 直接跳转，不检查时间（倒计时已经控制了按钮）
             const examUrl = `exam.html?username=${encodeURIComponent(username)}&language=${encodeURIComponent(language)}&level=${encodeURIComponent(level)}`;
             window.location.href = examUrl;
         }
