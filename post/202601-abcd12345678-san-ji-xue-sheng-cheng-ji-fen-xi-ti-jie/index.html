@@ -1,103 +1,102 @@
+
+<!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+    
+<meta charset="utf-8" >
+
 <title>[202601 abcd12345678 三级]学生成绩分析题解 | xxy150310`s blog</title>
-<link rel="shortcut icon" href="https://xxy150310git.github.io/favicon.ico?v=1774183752652">
-<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<meta name="description" content="这里是xxy150310的个人blog">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://xxy150310git.github.io/favicon.ico?v=1774184022066">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://xxy150310git.github.io/styles/main.css">
-<link rel="alternate" type="application/atom+xml" title="[202601 abcd12345678 三级]学生成绩分析题解 | xxy150310`s blog - Atom Feed" href="https://xxy150310git.github.io/atom.xml">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
 
 
 
-    <meta name="description" content="#题目大意
-给你一些学生的分数，要你求他们的平均分、最低分、最高分、高于平均分人数。
-#解题思路
-1.求平均分：累加学生分数得到总分，再用总分除以人数。
-2.求最大最小值：每次输入将max与分数取最大值，min与分数取最小值。
-3.高于平均..." />
-    <meta name="keywords" content="题解" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
-    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
   </head>
   <body>
-    <div class="main">
-      <div class="main-content">
-        <div class="site-header">
-  <a href="https://xxy150310git.github.io">
-  <img class="avatar" src="https://xxy150310git.github.io/images/avatar.png?v=1774183752652" alt="">
-  </a>
-  <h1 class="site-title">
-    xxy150310`s blog
-  </h1>
-  <p class="site-description">
-    这里是xxy150310的个人blog
-  </p>
-  <div class="menu-container">
-    
-      
-        <a href="/" class="menu">
-          首页
-        </a>
-      
-    
-      
-        <a href="/archives" class="menu">
-          归档
-        </a>
-      
-    
-      
-        <a href="/tags" class="menu">
-          标签
-        </a>
-      
-    
-      
-        <a href="/about" class="menu">
-          关于
-        </a>
-      
-    
-  </div>
-  <div class="social-container">
-    
-      
-    
-      
-    
-      
-    
-      
-    
-      
-    
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://xxy150310git.github.io">
+        <img class="avatar" src="https://xxy150310git.github.io/images/avatar.png?v=1774184022066" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://xxy150310git.github.io">
+        <h1 class="site-title">xxy150310`s blog</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
   </div>
 </div>
 
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="/about" class="menu purple-link">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+
+      <div class="content-container">
         <div class="post-detail">
-          <article class="post">
-            <h2 class="post-title">
-              [202601 abcd12345678 三级]学生成绩分析题解
-            </h2>
-            <div class="post-info">
-              <span>
-                2026-03-22
-              </span>
-              <span>
-                2 min read
-              </span>
-              
-                <a href="https://xxy150310git.github.io/tag/w0UGFlMGo9/" class="post-tag">
-                  # 题解
-                </a>
-              
-            </div>
+          
+          <h2 class="post-title">[202601 abcd12345678 三级]学生成绩分析题解</h2>
+          <div class="post-info post-detail-info">
+            <span><i class="icon-calendar-outline"></i> 2026-03-22</span>
             
-            <div class="post-content-wrapper">
-              <div class="post-content">
-                <p>#题目大意<br>
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://xxy150310git.github.io/tag/w0UGFlMGo9/">
+                    题解
+                    
+                  </a>
+                
+              </span>
+            
+          </div>
+          <div class="post-content">
+            <p>#题目大意<br>
 给你一些学生的分数，要你求他们的平均分、最低分、最高分、高于平均分人数。</p>
 <p>#解题思路<br>
 1.求平均分：累加学生分数得到总分，再用总分除以人数。</p>
@@ -136,76 +135,57 @@ int main(){
 </code></pre>
 <p>(注:请勿直接抄袭题解)</p>
 
-              </div>
-              <div class="toc-container">
-                
-              </div>
-            </div>
-          </article>
+          </div>
         </div>
 
         
           <div class="next-post">
-            <div class="next">下一篇</div>
-            <a href="https://xxy150310git.github.io/post/202601-abcd12345678-yi-ji-lei-jia-te-ding-shu-zi-ti-jie/">
+            <a class="purple-link" href="https://xxy150310git.github.io/post/202601-abcd12345678-yi-ji-lei-jia-te-ding-shu-zi-ti-jie/">
               <h3 class="post-title">
-                [202601 abcd12345678 一级]累加特定数字题解
+                下一篇：[202601 abcd12345678 一级]累加特定数字题解
               </h3>
             </a>
           </div>
-        
+          
+      </div>
 
-        
+      
 
-        <div class="site-footer">
-  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
-  <a class="rss" href="https://xxy150310git.github.io/atom.xml" target="_blank">
-    <i class="ri-rss-line"></i> RSS
-  </a>
+      <div class="site-footer">
+  <div class="slogan">这里是xxy150310的个人blog</div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://xxy150310git.github.io/atom.xml" target="_blank">RSS</a>
 </div>
 
-      </div>
+
     </div>
+    <script type="application/javascript">
 
-    <script>
-      hljs.initHighlightingOnLoad()
+hljs.initHighlightingOnLoad()
 
-      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
 
-      // This should probably be throttled.
-      // Especially because it triggers during smooth scrolling.
-      // https://lodash.com/docs/4.17.10#throttle
-      // You could do like...
-      // window.addEventListener("scroll", () => {
-      //    _.throttle(doThatStuff, 100);
-      // });
-      // Only not doing it here to keep this Pen dependency-free.
+</script>
 
-      window.addEventListener("scroll", event => {
-        let fromTop = window.scrollY;
 
-        mainNavLinks.forEach((link, index) => {
-          let section = document.getElementById(decodeURI(link.hash).substring(1));
-          let nextSection = null
-          if (mainNavLinks[index + 1]) {
-            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
-          }
-          if (section.offsetTop <= fromTop) {
-            if (nextSection) {
-              if (nextSection.offsetTop > fromTop) {
-                link.classList.add("current");
-              } else {
-                link.classList.remove("current");    
-              }
-            } else {
-              link.classList.add("current");
-            }
-          } else {
-            link.classList.remove("current");
-          }
-        });
-      });
 
-    </script>
+
   </body>
 </html>

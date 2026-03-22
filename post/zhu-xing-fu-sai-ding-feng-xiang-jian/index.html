@@ -1,104 +1,109 @@
+
+<!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+    
+<meta charset="utf-8" >
+
 <title>逐星赴赛，顶峰相见 | xxy150310`s blog</title>
-<link rel="shortcut icon" href="https://xxy150310git.github.io/favicon.ico?v=1774183752652">
-<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<meta name="description" content="这里是xxy150310的个人blog">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://xxy150310git.github.io/favicon.ico?v=1774184022066">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://xxy150310git.github.io/styles/main.css">
-<link rel="alternate" type="application/atom+xml" title="逐星赴赛，顶峰相见 | xxy150310`s blog - Atom Feed" href="https://xxy150310git.github.io/atom.xml">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
 
 
 
-    <meta name="description" content="逐星赴赛，顶峰相见
-（前传）
-星轨集训营的结业仪式很简单，没有盛大的典礼，只有Double_G站在老科创楼的大厅里，手里攥着一叠省队推荐函，阳光透过窗户洒在墙上的奖状上，给那些泛黄的照片镀上了一层金边。306宿舍的八个人站在最前排，身姿挺拔..." />
-    <meta name="keywords" content="作者的小说,休闲 · 娱乐" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
-    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
   </head>
   <body>
-    <div class="main">
-      <div class="main-content">
-        <div class="site-header">
-  <a href="https://xxy150310git.github.io">
-  <img class="avatar" src="https://xxy150310git.github.io/images/avatar.png?v=1774183752652" alt="">
-  </a>
-  <h1 class="site-title">
-    xxy150310`s blog
-  </h1>
-  <p class="site-description">
-    这里是xxy150310的个人blog
-  </p>
-  <div class="menu-container">
-    
-      
-        <a href="/" class="menu">
-          首页
-        </a>
-      
-    
-      
-        <a href="/archives" class="menu">
-          归档
-        </a>
-      
-    
-      
-        <a href="/tags" class="menu">
-          标签
-        </a>
-      
-    
-      
-        <a href="/about" class="menu">
-          关于
-        </a>
-      
-    
-  </div>
-  <div class="social-container">
-    
-      
-    
-      
-    
-      
-    
-      
-    
-      
-    
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://xxy150310git.github.io">
+        <img class="avatar" src="https://xxy150310git.github.io/images/avatar.png?v=1774184022066" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://xxy150310git.github.io">
+        <h1 class="site-title">xxy150310`s blog</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
   </div>
 </div>
 
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="/about" class="menu purple-link">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+
+      <div class="content-container">
         <div class="post-detail">
-          <article class="post">
-            <h2 class="post-title">
-              逐星赴赛，顶峰相见
-            </h2>
-            <div class="post-info">
-              <span>
-                2026-03-22
-              </span>
-              <span>
-                36 min read
-              </span>
-              
-                <a href="https://xxy150310git.github.io/tag/PtAGcd_677/" class="post-tag">
-                  # 作者的小说
-                </a>
-              
-                <a href="https://xxy150310git.github.io/tag/bH9UBORnWHH/" class="post-tag">
-                  # 休闲 · 娱乐
-                </a>
-              
-            </div>
+          
+          <h2 class="post-title">逐星赴赛，顶峰相见</h2>
+          <div class="post-info post-detail-info">
+            <span><i class="icon-calendar-outline"></i> 2026-03-22</span>
             
-            <div class="post-content-wrapper">
-              <div class="post-content">
-                <h1 id="逐星赴赛顶峰相见">逐星赴赛，顶峰相见</h1>
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://xxy150310git.github.io/tag/PtAGcd_677/">
+                    作者的小说
+                    
+                      ，
+                    
+                  </a>
+                
+                  <a href="https://xxy150310git.github.io/tag/bH9UBORnWHH/">
+                    休闲 · 娱乐
+                    
+                  </a>
+                
+              </span>
+            
+          </div>
+          <div class="post-content">
+            <h1 id="逐星赴赛顶峰相见">逐星赴赛，顶峰相见</h1>
 <p>（<a href="https://www.luogu.com.cn/article/eb98awtk">前传</a>）</p>
 <p>星轨集训营的结业仪式很简单，没有盛大的典礼，只有Double_G站在老科创楼的大厅里，手里攥着一叠省队推荐函，阳光透过窗户洒在墙上的奖状上，给那些泛黄的照片镀上了一层金边。306宿舍的八个人站在最前排，身姿挺拔，脸上带着少年人独有的意气风发，又藏着几分对离别与前路的忐忑。</p>
 <p>“省赛定在一个月后，地点在省会的省竞赛中心，”Double_G的声音比往常多了几分郑重，“你们八个，是这次集训营最出色的苗子，也是省队的核心力量。孤星会作为省队教练，全程带队备战，后续的训练计划，由他统一安排。”</p>
@@ -238,79 +243,57 @@
 <p>夕阳西下，金色的阳光洒在少年们的身上，他们的身影，在夕阳的映衬下，格外挺拔。他们并肩站在一起，望着远方，眼里满是憧憬和坚定。键盘声虽已落幕，但他们的故事，还在继续；算法的星轨之上，他们的征程，才刚刚开启。</p>
 <p>他们约定，在更高处相见，在更远的赛场上，继续书写属于他们的青春与热血，继续追逐属于他们的梦想与光芒。而那些在星轨集训营里的日子，那些并肩作战的时光，那些努力与坚持，那些欢笑与泪水，都将成为他们青春里，最珍贵、最难忘的回忆，激励着他们，一路向前，永不言弃。</p>
 
-              </div>
-              <div class="toc-container">
-                <ul class="markdownIt-TOC">
-<li><a href="#%E9%80%90%E6%98%9F%E8%B5%B4%E8%B5%9B%E9%A1%B6%E5%B3%B0%E7%9B%B8%E8%A7%81">逐星赴赛，顶峰相见</a></li>
-</ul>
-
-              </div>
-            </div>
-          </article>
+          </div>
         </div>
 
         
           <div class="next-post">
-            <div class="next">下一篇</div>
-            <a href="https://xxy150310git.github.io/post/xing-gui-ji-xun-ying-quan-ji/">
+            <a class="purple-link" href="https://xxy150310git.github.io/post/xing-gui-ji-xun-ying-quan-ji/">
               <h3 class="post-title">
-                星轨集训营 全集
+                下一篇：星轨集训营 全集
               </h3>
             </a>
           </div>
-        
+          
+      </div>
 
-        
+      
 
-        <div class="site-footer">
-  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
-  <a class="rss" href="https://xxy150310git.github.io/atom.xml" target="_blank">
-    <i class="ri-rss-line"></i> RSS
-  </a>
+      <div class="site-footer">
+  <div class="slogan">这里是xxy150310的个人blog</div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://xxy150310git.github.io/atom.xml" target="_blank">RSS</a>
 </div>
 
-      </div>
+
     </div>
+    <script type="application/javascript">
 
-    <script>
-      hljs.initHighlightingOnLoad()
+hljs.initHighlightingOnLoad()
 
-      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
 
-      // This should probably be throttled.
-      // Especially because it triggers during smooth scrolling.
-      // https://lodash.com/docs/4.17.10#throttle
-      // You could do like...
-      // window.addEventListener("scroll", () => {
-      //    _.throttle(doThatStuff, 100);
-      // });
-      // Only not doing it here to keep this Pen dependency-free.
+</script>
 
-      window.addEventListener("scroll", event => {
-        let fromTop = window.scrollY;
 
-        mainNavLinks.forEach((link, index) => {
-          let section = document.getElementById(decodeURI(link.hash).substring(1));
-          let nextSection = null
-          if (mainNavLinks[index + 1]) {
-            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
-          }
-          if (section.offsetTop <= fromTop) {
-            if (nextSection) {
-              if (nextSection.offsetTop > fromTop) {
-                link.classList.add("current");
-              } else {
-                link.classList.remove("current");    
-              }
-            } else {
-              link.classList.add("current");
-            }
-          } else {
-            link.classList.remove("current");
-          }
-        });
-      });
 
-    </script>
+
   </body>
 </html>
