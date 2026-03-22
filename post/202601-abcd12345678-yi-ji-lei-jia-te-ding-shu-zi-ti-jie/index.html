@@ -1,9 +1,11 @@
+
+<!DOCTYPE html>
 <html>
   <head>
     
 <meta charset="utf-8" >
 
-<title>xxy150310`s blog</title>
+<title>[202601 abcd12345678 一级]累加特定数字题解 | xxy150310`s blog</title>
 <meta name="description" content="这里是xxy150310的个人blog">
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
@@ -75,23 +77,63 @@
 </transition>
 
 
-        <div class="content-container">
+      <div class="content-container">
+        <div class="post-detail">
           
-          <div class="tags-container">
+          <h2 class="post-title">[202601 abcd12345678 一级]累加特定数字题解</h2>
+          <div class="post-info post-detail-info">
+            <span><i class="icon-calendar-outline"></i> 2026-03-22</span>
             
-              <a class="tag" href="https://https://xxy150310git.github.io/blog/tag/PtAGcd_677/">作者的小说</a>
-            
-              <a class="tag" href="https://https://xxy150310git.github.io/blog/tag/bH9UBORnWHH/">休闲 · 娱乐</a>
-            
-              <a class="tag" href="https://https://xxy150310git.github.io/blog/tag/iaBSQA_El1/">GC极客杯</a>
-            
-              <a class="tag" href="https://https://xxy150310git.github.io/blog/tag/w0UGFlMGo9/">题解</a>
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://https://xxy150310git.github.io/blog/tag/w0UGFlMGo9/">
+                    题解
+                    
+                  </a>
+                
+              </span>
             
           </div>
+          <div class="post-content">
+            <p>#题目大意<br>
+给你两个正整数a,b,要你求a到b之间的偶数之和</p>
+<p>#解题思路<br>
+若a&gt;b,交换a,b。遍历a到b，判断i是否为偶数,是则让ans+i</p>
+<p>#核心代码</p>
+<pre><code class="language-cpp">#include&lt;bits/stdc++.h&gt;
+using namespace std;
+int main(){
+    int a,b;
+    int ans=0;
+    cin&gt;&gt;a&gt;&gt;b;
+    if(a&gt;b)swap(a,b);
+    for(int i=a;i&lt;=b;i++){
+        if(i%2==0)ans+=i;
+    }
+    cout&lt;&lt;ans;
+    return 0;
+}
+</code></pre>
+<p>(注:请勿直接抄袭题解)</p>
 
+          </div>
         </div>
 
-        <div class="site-footer">
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://https://xxy150310git.github.io/blog/post/202601-abcd12345678-yi-ji-ji-suan-ju-xing-bian-chang-ti-jie/">
+              <h3 class="post-title">
+                下一篇：[202601 abcd12345678 一级]计算矩形边长题解
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
   <div class="slogan">这里是xxy150310的个人blog</div>
   <div class="social-container">
     
@@ -110,8 +152,8 @@
 </div>
 
 
-      </div>
-      <script type="application/javascript">
+    </div>
+    <script type="application/javascript">
 
 hljs.initHighlightingOnLoad()
 
@@ -127,6 +169,5 @@ var app = new Vue({
 
 
 
-    </div>
   </body>
 </html>

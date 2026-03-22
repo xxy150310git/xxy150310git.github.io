@@ -1,9 +1,11 @@
+
+<!DOCTYPE html>
 <html>
   <head>
     
 <meta charset="utf-8" >
 
-<title>xxy150310`s blog</title>
+<title>[202601 abcd12345678 三级]学生成绩分析题解 | xxy150310`s blog</title>
 <meta name="description" content="这里是xxy150310的个人blog">
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
@@ -75,23 +77,81 @@
 </transition>
 
 
-        <div class="content-container">
+      <div class="content-container">
+        <div class="post-detail">
           
-          <div class="tags-container">
+          <h2 class="post-title">[202601 abcd12345678 三级]学生成绩分析题解</h2>
+          <div class="post-info post-detail-info">
+            <span><i class="icon-calendar-outline"></i> 2026-03-22</span>
             
-              <a class="tag" href="https://https://xxy150310git.github.io/blog/tag/PtAGcd_677/">作者的小说</a>
-            
-              <a class="tag" href="https://https://xxy150310git.github.io/blog/tag/bH9UBORnWHH/">休闲 · 娱乐</a>
-            
-              <a class="tag" href="https://https://xxy150310git.github.io/blog/tag/iaBSQA_El1/">GC极客杯</a>
-            
-              <a class="tag" href="https://https://xxy150310git.github.io/blog/tag/w0UGFlMGo9/">题解</a>
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://https://xxy150310git.github.io/blog/tag/w0UGFlMGo9/">
+                    题解
+                    
+                  </a>
+                
+              </span>
             
           </div>
+          <div class="post-content">
+            <p>#题目大意<br>
+给你一些学生的分数，要你求他们的平均分、最低分、最高分、高于平均分人数。</p>
+<p>#解题思路<br>
+1.求平均分：累加学生分数得到总分，再用总分除以人数。</p>
+<p>2.求最大最小值：每次输入将max与分数取最大值，min与分数取最小值。</p>
+<p>3.高于平均分人数：遍历学生分数，将学生分数与平均分比较，若高于平均分则让高于平均分人数++。</p>
+<p>#核心代码</p>
+<pre><code class="language-cpp">
+#include&lt;iostream&gt;
+#include&lt;algorithm&gt;
+#include&lt;iomanip&gt;
+//考试别用万能头
+using namespace std;
+int a[105];//学生成绩
+int main(){
+    //freopen(&quot;---.in&quot;,&quot;r&quot;,stdin);
+    //freopen(&quot;---.out&quot;,&quot;w&quot;,stdout);
+    //不写freopen见祖宗
+    int n,ma=0,mi=101,h=0;
+    cin&gt;&gt;n;
+    for(int i=1;i&lt;=n;i++){
+        cin&gt;&gt;a[i];
+        h+=a[i];//求和
+        ma=max(ma,a[i]);
+        mi=min(mi,a[i]);
+    }
+    double av=h*1.0/n;//平均数=数列之和÷数列长度
+    int r=0;
+    for(int i=1;i&lt;=n;i++){
+        if(a[i]&gt;av)r++;//计算大于平均分人数
+    }
+    cout&lt;&lt;&quot;Average: &quot;&lt;&lt;fixed&lt;&lt;setprecision(1)&lt;&lt;h*1.0/n&lt;&lt;endl;
+    cout&lt;&lt;&quot;Max: &quot;&lt;&lt;ma&lt;&lt;&quot;, Min: &quot;&lt;&lt;mi&lt;&lt;endl;
+    cout&lt;&lt;&quot;Above average: &quot;&lt;&lt;r;
+    return 0;//好习惯
+}
+</code></pre>
+<p>(注:请勿直接抄袭题解)</p>
 
+          </div>
         </div>
 
-        <div class="site-footer">
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://https://xxy150310git.github.io/blog/post/202601-abcd12345678-yi-ji-lei-jia-te-ding-shu-zi-ti-jie/">
+              <h3 class="post-title">
+                下一篇：[202601 abcd12345678 一级]累加特定数字题解
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
   <div class="slogan">这里是xxy150310的个人blog</div>
   <div class="social-container">
     
@@ -110,8 +170,8 @@
 </div>
 
 
-      </div>
-      <script type="application/javascript">
+    </div>
+    <script type="application/javascript">
 
 hljs.initHighlightingOnLoad()
 
@@ -127,6 +187,5 @@ var app = new Vue({
 
 
 
-    </div>
   </body>
 </html>
