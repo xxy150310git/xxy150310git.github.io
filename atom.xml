@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://xxy150310git.github.io</id>
     <title>xxy150310`s blog</title>
-    <updated>2026-03-22T12:53:43.911Z</updated>
+    <updated>2026-03-23T12:29:31.614Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://xxy150310git.github.io"/>
     <link rel="self" href="https://xxy150310git.github.io/atom.xml"/>
@@ -10,6 +10,240 @@
     <logo>https://xxy150310git.github.io/images/avatar.png</logo>
     <icon>https://xxy150310git.github.io/favicon.ico</icon>
     <rights>All rights reserved 2026, xxy150310`s blog</rights>
+    <entry>
+        <title type="html"><![CDATA[abcd12345678 第八期入门赛赛后总结]]></title>
+        <id>https://xxy150310git.github.io/post/abcd12345678-di-ba-qi-ru-men-sai-sai-hou-zong-jie/</id>
+        <link href="https://xxy150310git.github.io/post/abcd12345678-di-ba-qi-ru-men-sai-sai-hou-zong-jie/">
+        </link>
+        <updated>2026-03-23T12:18:50.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="先告个别这是倒数第三期入门赛">先告个别：这是倒数第三期入门赛</h2>
+<p>本次比赛有4人报名，3人有分，其中各个题目数据如下：<br>
+###A题：计算器<br>
+本题满分120分，平均得分四舍五入为63.33分，略低于预期。<br>
+AC code:</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;sstream&gt;
+#include &lt;algorithm&gt;
+#include &lt;vector&gt;
+#include &lt;cstring&gt;
+using namespace std;
+
+// 大整数加法
+string add(string a, string b) {
+    if (a.length() &lt; b.length()) swap(a, b);
+    
+    string result = &quot;&quot;;
+    int carry = 0;
+    int i = a.length() - 1;
+    int j = b.length() - 1;
+    
+    while (i &gt;= 0 || carry) {
+        int sum = carry;
+        if (i &gt;= 0) sum += a[i] - '0';
+        if (j &gt;= 0) sum += b[j] - '0';
+        
+        result += char(sum % 10 + '0');
+        carry = sum / 10;
+        
+        i--;
+        j--;
+    }
+    
+    reverse(result.begin(), result.end());
+    return result;
+}
+
+// 大整数减法（a &gt;= b）
+string subtract(string a, string b) {
+    string result = &quot;&quot;;
+    int borrow = 0;
+    int i = a.length() - 1;
+    int j = b.length() - 1;
+    
+    while (i &gt;= 0) {
+        int digit_a = a[i] - '0' - borrow;
+        int digit_b = (j &gt;= 0) ? b[j] - '0' : 0;
+        
+        if (digit_a &lt; digit_b) {
+            digit_a += 10;
+            borrow = 1;
+        } else {
+            borrow = 0;
+        }
+        
+        result += char(digit_a - digit_b + '0');
+        
+        i--;
+        j--;
+    }
+    
+    // 去除前导0
+    while (result.length() &gt; 1 &amp;&amp; result.back() == '0') {
+        result.pop_back();
+    }
+    
+    reverse(result.begin(), result.end());
+    return result;
+}
+
+// 大整数乘法
+string multiply(string a, string b) {
+    if (a == &quot;0&quot; || b == &quot;0&quot;) return &quot;0&quot;;
+    
+    int n = a.length();
+    int m = b.length();
+    vector&lt;int&gt; pos(n + m, 0);
+    
+    for (int i = n - 1; i &gt;= 0; i--) {
+        for (int j = m - 1; j &gt;= 0; j--) {
+            int mul = (a[i] - '0') * (b[j] - '0');
+            int p1 = i + j;
+            int p2 = i + j + 1;
+            int sum = mul + pos[p2];
+            
+            pos[p2] = sum % 10;
+            pos[p1] += sum / 10;
+        }
+    }
+    
+    string result;
+    for (int num : pos) {
+        if (!(result.empty() &amp;&amp; num == 0)) {
+            result += char(num + '0');
+        }
+    }
+    
+    return result.empty() ? &quot;0&quot; : result;
+}
+
+int main() {
+    int k;
+    string line;
+    
+    // 读取k
+    if (!(cin &gt;&gt; k)) return 0;
+    
+    // 读取剩余的空格和换行符
+    getline(cin, line); // 读取第一行剩下的部分
+    
+    // 读取第二行
+    getline(cin, line);
+    
+    // 解析输入
+    stringstream ss(line);
+    string a, op, b;
+    ss &gt;&gt; a &gt;&gt; op &gt;&gt; b;
+    
+    string result;
+    
+    if (op == &quot;+&quot;) {
+        result = add(a, b);
+    } else if (op == &quot;-&quot;) {
+        result = subtract(a, b);
+    } else if (op == &quot;*&quot;) {
+        result = multiply(a, b);
+    }
+    
+    int len = result.length();
+    
+    // 输出前k位
+    int front_len = min(k, len);
+    cout &lt;&lt; result.substr(0, front_len) &lt;&lt; endl;
+    
+    // 输出后k位
+    int back_len = min(k, len);
+    int start_pos = len - back_len;
+    if (start_pos &lt; 0) start_pos = 0;
+    
+    string back_str = result.substr(start_pos, back_len);
+    
+    // 补前导0
+    if ((int)back_str.length() &lt; k) {
+        back_str = string(k - back_str.length(), '0') + back_str;
+    }
+    
+    cout &lt;&lt; back_str &lt;&lt; endl;
+    
+    return 0;
+}
+</code></pre>
+<p>###B题：数字游戏<br>
+本题满分100分，平均得分四舍五入为98.33分，远高于预期。<br>
+AC code:</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;cmath&gt;
+#include &lt;algorithm&gt;
+
+using namespace std;
+
+int main() {
+    double a;
+    cin &gt;&gt; a; // 读取输入（最多一位小数，0&lt;a&lt;100）
+    
+    // 0&lt;a&lt;100范围内的所有完全平方数（1²~10²）
+    const int squares[] = {1, 4, 9, 16, 25, 36, 49, 64, 81, 100};
+    const int square_count = sizeof(squares) / sizeof(squares[0]);
+    
+    double min_diff = 100.0; // 初始化为超过范围的极大值
+    for (int sq : squares) {
+        double diff = fabs(a - sq); // 计算当前平方数与a的差值
+        if (diff &lt; min_diff) {
+            min_diff = diff; // 更新最小差值
+        }
+    }
+    
+    // 四舍五入得到最少操作次数（最多一位小数，round无精度问题）
+    int ans = round(min_diff);
+    cout &lt;&lt; ans &lt;&lt; endl;
+    
+    return 0;
+}
+</code></pre>
+<p>###C题：数组排序<br>
+本题满分100分，平均得分四舍五入为100分，远高于预期。<br>
+由于全部AC所以不给代码了。<br>
+###D题：字符串回文判断<br>
+本题满分100分，平均得分四舍五入为66.66分，远低于预期。<br>
+AC code:</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;cctype&gt;
+using namespace std;
+
+int main() {
+    string s;
+    getline(cin, s); // 读取包含空格的整行
+    
+    string filtered;
+    // 过滤：只保留字母和数字，并转为小写
+    for (char c : s) {
+        if (isalnum(c)) { // 检查是否为字母或数字
+            filtered += tolower(c);
+        }
+    }
+    
+    // 判断是否为回文
+    int left = 0, right = filtered.length() - 1;
+    bool isPalindrome = true;
+    while (left &lt; right) {
+        if (filtered[left] != filtered[right]) {
+            isPalindrome = false;
+            break;
+        }
+        left++;
+        right--;
+    }
+    
+    cout &lt;&lt; (isPalindrome ? &quot;YES&quot; : &quot;NO&quot;) &lt;&lt; endl;
+    
+    return 0;
+}
+</code></pre>
+<p>###E题：Who Can try?<br>
+本题满分100分，平均得分四舍五入为16.67分，符合预期。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[逐星赴赛，顶峰相见]]></title>
         <id>https://xxy150310git.github.io/post/zhu-xing-fu-sai-ding-feng-xiang-jian/</id>
