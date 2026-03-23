@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" >
 
-<title>”极客杯“闪亮登场 | xxy150310`s blog</title>
+<title>辗转相除法（欧几里得算法）总结 | xxy150310`s blog</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
@@ -18,20 +18,15 @@
 
 
 
-    <meta name="description" content="极客杯是 abcd12345678 团队内部的一场算法友谊赛。比赛旨在为团队成员提供一个切磋技术、交流思路、共同进步的平台。
-这是属于我们自己的比赛，无论水平高低，重在参与，乐在成长！
-
-
-
-
-内容
-
-
-
-
-比赛名称
-abcd1234567..." />
-    <meta name="keywords" content="GC极客杯" />
+    <meta name="description" content="一、算法定义
+辗转相除法，又称欧几里得算法，是用于快速计算两个正整数**最大公约数（gcd）**的经典算法。
+二、核心原理
+核心公式：
+[
+\gcd(a,\ b) = \gcd(b,\ a\bmod b)
+]
+不断用较大数对较小数取余，重复..." />
+    <meta name="keywords" content="学习资料,GESP五级" />
   </head>
   <body>
     <div id="app" class="main">
@@ -96,53 +91,65 @@ abcd1234567..." />
       <div class="main-container">
         <div class="content-container" data-aos="fade-up">
           <div class="post-detail">
-            <h2 class="post-title">”极客杯“闪亮登场</h2>
-            <div class="post-date">2026-03-22</div>
+            <h2 class="post-title">辗转相除法（欧几里得算法）总结</h2>
+            <div class="post-date">2026-03-23</div>
             
             <div class="post-content" v-pre>
-              <p>极客杯是 abcd12345678 团队内部的一场算法友谊赛。比赛旨在为团队成员提供一个切磋技术、交流思路、共同进步的平台。</p>
-<p>这是属于我们自己的比赛，无论水平高低，重在参与，乐在成长！</p>
-<table>
-<thead>
-<tr>
-<th style="text-align:right"></th>
-<th style="text-align:right">内容</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:right">比赛名称</td>
-<td style="text-align:right">abcd12345678 团队内部赛 · 极客杯</td>
-</tr>
-<tr>
-<td style="text-align:right">英文简称</td>
-<td style="text-align:right">GC (Geek Cup)</td>
-</tr>
-<tr>
-<td style="text-align:right">比赛时间</td>
-<td style="text-align:right">每个奇数月进行一次</td>
-</tr>
-<tr>
-<td style="text-align:right">比赛时长</td>
-<td style="text-align:right">初赛笔试1小时，复赛笔试1小时，决赛上机编程3小时</td>
-</tr>
-<tr>
-<td style="text-align:right">题目数量</td>
-<td style="text-align:right">不定</td>
-</tr>
-<tr>
-<td style="text-align:right">难度定位</td>
-<td style="text-align:right">入门~普及/提高-</td>
-</tr>
-</tbody>
-</table>
+              <h2 id="一-算法定义">一、算法定义</h2>
+<p>辗转相除法，又称<strong>欧几里得算法</strong>，是用于快速计算两个正整数**最大公约数（gcd）**的经典算法。</p>
+<h2 id="二-核心原理">二、核心原理</h2>
+<p>核心公式：<br>
+[<br>
+\gcd(a,\ b) = \gcd(b,\ a\bmod b)<br>
+]<br>
+不断用<strong>较大数对较小数取余</strong>，重复替换，直到余数为 0，此时的<strong>非零数</strong>即为最大公约数。</p>
+<h2 id="三-算法步骤">三、算法步骤</h2>
+<p>设求 (a,b) 的最大公约数，不妨设 (a \ge b)：</p>
+<ol>
+<li>计算 (r = a \bmod b)</li>
+<li>若 (r = 0)，则 (b) 就是最大公约数</li>
+<li>若 (r \neq 0)，令 (a = b,\ b = r)，回到第 1 步继续计算</li>
+</ol>
+<h2 id="四-重要性质">四、重要性质</h2>
+<ol>
+<li>
+<p><strong>时间复杂度</strong><br>
+接近对数级别 (O(\log(\min(a,b))))，计算速度极快。</p>
+</li>
+<li>
+<p><strong>与最小公倍数的关系</strong><br>
+[<br>
+\text{lcm}(a,b) = \frac{a\times b}{\gcd(a,b)}<br>
+]</p>
+</li>
+<li>
+<p><strong>扩展欧几里得算法基础</strong><br>
+辗转相除法是扩展欧几里得算法的核心，可用于求解不定方程、模逆元等数论问题。</p>
+</li>
+<li>
+<p><strong>互质判定</strong><br>
+若 (\gcd(a,b)=1)，则 (a,b) 互质。</p>
+</li>
+</ol>
+<h2 id="五-适用场景">五、适用场景</h2>
+<ul>
+<li>求两个数的最大公约数</li>
+<li>分数约分</li>
+<li>求解线性同余方程</li>
+<li>模运算与逆元计算</li>
+<li>数论证明与算法优化</li>
+</ul>
 
             </div>
             
               <div class="tag-container">
                 
-                  <a href="https://xxy150310git.github.io/tag/iaBSQA_El1/" class="tag">
-                    GC极客杯
+                  <a href="https://xxy150310git.github.io/tag/DnvzBHGGr3/" class="tag">
+                    学习资料
+                  </a>
+                
+                  <a href="https://xxy150310git.github.io/tag/4xesdGIskzJ/" class="tag">
+                    GESP五级
                   </a>
                 
               </div>
@@ -150,9 +157,9 @@ abcd1234567..." />
             
               <div class="next-post">
                 <div class="next">下一篇</div>
-                <a href="https://xxy150310git.github.io/post/202601-abcd12345678-san-ji-xue-sheng-cheng-ji-fen-xi-ti-jie/">
+                <a href="https://xxy150310git.github.io/post/wei-yi-fen-jie-ding-li-suan-zhu-ji-ben-ding-li-zong-jie/">
                   <h3 class="post-title">
-                    [202601 abcd12345678 三级]学生成绩分析题解
+                    唯一分解定理（算术基本定理）总结
                   </h3>
                 </a>
               </div>

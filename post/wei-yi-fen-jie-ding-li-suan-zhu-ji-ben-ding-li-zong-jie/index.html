@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>唯一分解定理（算术基本定理）总结 | xxy150310`s blog</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://xxy150310git.github.io/favicon.ico?v=1774270263081">
+<link rel="stylesheet" href="https://xxy150310git.github.io/styles/main.css">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="一、定理内容
+任何一个大于 1 的正整数，如果不计质因数的排列顺序，都可以唯一地分解成有限个质数的乘积形式。
+写成数学形式：
+[
+n = p_1^{a_1} \times p_2^{a_2} \times \cdots \times p_k..." />
+    <meta name="keywords" content="学习资料,GESP五级" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://xxy150310git.github.io">
+        <img src="https://xxy150310git.github.io/images/avatar.png?v=1774270263081" class="site-logo">
+        <h1 class="site-title">xxy150310`s blog</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      这里是xxy150310的个人blog
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://xxy150310git.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">唯一分解定理（算术基本定理）总结</h2>
+            <div class="post-date">2026-03-23</div>
+            
+            <div class="post-content" v-pre>
+              <h2 id="一-定理内容">一、定理内容</h2>
+<p>任何一个<strong>大于 1 的正整数</strong>，如果不计质因数的排列顺序，都可以<strong>唯一地</strong>分解成有限个质数的乘积形式。</p>
+<p>写成数学形式：<br>
+[<br>
+n = p_1^{a_1} \times p_2^{a_2} \times \cdots \times p_k^{a_k}<br>
+]<br>
+其中：</p>
+<ul>
+<li>( p_1 &lt; p_2 &lt; \dots &lt; p_k ) 为互不相同的质数</li>
+<li>( a_1,a_2,\dots,a_k ) 为正整数，称为对应质因子的<strong>指数</strong></li>
+</ul>
+<h2 id="二-核心性质">二、核心性质</h2>
+<ol>
+<li>
+<p><strong>存在性</strong><br>
+每个大于 1 的整数都至少存在一种质因数分解方式。</p>
+</li>
+<li>
+<p><strong>唯一性</strong><br>
+分解结果在不计质数顺序时是唯一的，不会出现两组完全不同的质数乘积等于同一个数。</p>
+</li>
+<li>
+<p><strong>与整除的关系</strong><br>
+若 (d \mid n)，则 (d) 的质因子一定都是 (n) 的质因子，且对应指数不超过 (n) 中的指数。</p>
+</li>
+</ol>
+<h2 id="三-常用推论">三、常用推论</h2>
+<ol>
+<li>
+<p><strong>正因数个数公式</strong><br>
+[<br>
+d(n) = (a_1+1)(a_2+1)\cdots(a_k+1)<br>
+]</p>
+</li>
+<li>
+<p><strong>正因数之和公式</strong><br>
+[<br>
+\sigma(n)<br>
+= (1+p_1+p_1<sup>2+\dots+p_1</sup>{a_1})<br>
+\times \cdots<br>
+\times (1+p_k+p_k<sup>2+\dots+p_k</sup>{a_k})<br>
+]</p>
+</li>
+<li>
+<p><strong>最大公约数与最小公倍数</strong><br>
+对两个数分别分解质因数后：</p>
+</li>
+</ol>
+<ul>
+<li>(\gcd) 取<strong>各质因子指数较小者</strong></li>
+<li>(\text{lcm}) 取<strong>各质因子指数较大者</strong></li>
+</ul>
+<ol start="4">
+<li><strong>互质判定</strong><br>
+两个数互质的充要条件是：它们<strong>没有公共质因子</strong>。</li>
+</ol>
+<h2 id="四-典型应用">四、典型应用</h2>
+<ul>
+<li>素数判定与质因数分解</li>
+<li>求约数个数、约数和</li>
+<li>计算最大公约数、最小公倍数</li>
+<li>分数约分、通分</li>
+<li>数论计数、整除性证明</li>
+<li>与筛法结合，预处理质因子信息</li>
+</ul>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://xxy150310git.github.io/tag/DnvzBHGGr3/" class="tag">
+                    学习资料
+                  </a>
+                
+                  <a href="https://xxy150310git.github.io/tag/4xesdGIskzJ/" class="tag">
+                    GESP五级
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://xxy150310git.github.io/post/su-shu-shai-fa-zong-jie-ai-shi-shai-fa-yu-xian-xing-shai-fa/">
+                  <h3 class="post-title">
+                    素数筛法总结：埃氏筛法与线性筛法
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+
+  </body>
+</html>

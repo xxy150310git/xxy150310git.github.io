@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>素数筛法总结：埃氏筛法与线性筛法 | xxy150310`s blog</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://xxy150310git.github.io/favicon.ico?v=1774270263081">
+<link rel="stylesheet" href="https://xxy150310git.github.io/styles/main.css">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="素数筛法总结：埃氏筛法与线性筛法
+一、概述
+在数论与算法中，快速生成指定范围内的素数表是常用基础操作。其中最具代表性的两种方法为埃拉托斯特尼筛法（埃氏筛）与线性筛法（欧拉筛），二者均通过标记合数来筛选素数，但效率与实现思路存在明显差异。
+
+..." />
+    <meta name="keywords" content="学习资料,GESP五级" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://xxy150310git.github.io">
+        <img src="https://xxy150310git.github.io/images/avatar.png?v=1774270263081" class="site-logo">
+        <h1 class="site-title">xxy150310`s blog</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      这里是xxy150310的个人blog
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://xxy150310git.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">素数筛法总结：埃氏筛法与线性筛法</h2>
+            <div class="post-date">2026-03-23</div>
+            
+            <div class="post-content" v-pre>
+              <h1 id="素数筛法总结埃氏筛法与线性筛法">素数筛法总结：埃氏筛法与线性筛法</h1>
+<h2 id="一-概述">一、概述</h2>
+<p>在数论与算法中，快速生成指定范围内的素数表是常用基础操作。其中最具代表性的两种方法为<strong>埃拉托斯特尼筛法（埃氏筛）<strong>与</strong>线性筛法（欧拉筛）</strong>，二者均通过标记合数来筛选素数，但效率与实现思路存在明显差异。</p>
+<hr>
+<h2 id="二-埃拉托斯特尼筛法埃氏筛">二、埃拉托斯特尼筛法（埃氏筛）</h2>
+<h3 id="1-核心思想">1. 核心思想</h3>
+<p>从最小素数 2 开始，依次将每个素数的所有倍数标记为合数。遍历完成后，未被标记的数即为素数。</p>
+<h3 id="2-算法流程">2. 算法流程</h3>
+<ol>
+<li>建立标记数组，初始假设所有数均为素数，0 和 1 直接标记为非素数。</li>
+<li>从 2 开始遍历到目标范围的平方根：
+<ul>
+<li>若当前数未被标记，说明其为素数。</li>
+<li>将该素数的所有倍数统一标记为合数。</li>
+</ul>
+</li>
+<li>最终未被标记的数即为范围内所有素数。</li>
+</ol>
+<h3 id="3-特点">3. 特点</h3>
+<ul>
+<li>实现简单直观，易于理解与编写。</li>
+<li>存在重复标记问题，同一个合数可能被多个素数多次标记。</li>
+<li>时间复杂度接近线性，在常规范围内效率足够。</li>
+</ul>
+<hr>
+<h2 id="三-线性筛法欧拉筛">三、线性筛法（欧拉筛）</h2>
+<h3 id="1-核心思想-2">1. 核心思想</h3>
+<p>保证<strong>每个合数只被其最小质因数标记一次</strong>，彻底消除重复标记，从而达到严格线性时间复杂度。</p>
+<h3 id="2-算法流程-2">2. 算法流程</h3>
+<ol>
+<li>建立标记数组与素数列表，初始 0、1 标记为非素数。</li>
+<li>从 2 开始遍历到目标范围：
+<ul>
+<li>若当前数未被标记，则为素数，加入素数列表。</li>
+<li>依次用当前数与已得到的素数相乘，标记乘积为合数。</li>
+<li>当当前数能被某素数整除时，停止本轮标记，确保最小质因数唯一性。</li>
+</ul>
+</li>
+<li>最终素数列表即为所求结果。</li>
+</ol>
+<h3 id="3-特点-2">3. 特点</h3>
+<ul>
+<li>无重复标记，每个数仅被访问一次，效率最优。</li>
+<li>逻辑比埃氏筛略复杂，需要控制标记时机。</li>
+<li>时间复杂度为严格线性，适合处理更大范围的素数筛选。</li>
+</ul>
+<hr>
+<h2 id="四-对比总结">四、对比总结</h2>
+<ul>
+<li>埃氏筛：简单易懂，适合小规模数据与教学场景。</li>
+<li>线性筛：效率更高，无冗余操作，适合大数据范围与算法竞赛场景。</li>
+<li>两者均使用数组标记，空间复杂度相近。</li>
+</ul>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://xxy150310git.github.io/tag/DnvzBHGGr3/" class="tag">
+                    学习资料
+                  </a>
+                
+                  <a href="https://xxy150310git.github.io/tag/4xesdGIskzJ/" class="tag">
+                    GESP五级
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://xxy150310git.github.io/post/abcd12345678-di-ba-qi-ru-men-sai-sai-hou-zong-jie/">
+                  <h3 class="post-title">
+                    abcd12345678 第八期入门赛赛后总结
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+
+  </body>
+</html>

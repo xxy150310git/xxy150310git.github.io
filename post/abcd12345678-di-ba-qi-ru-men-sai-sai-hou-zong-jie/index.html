@@ -1,13 +1,20 @@
+<!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="utf-8" >
+
 <title>abcd12345678 第八期入门赛赛后总结 | xxy150310`s blog</title>
-<link rel="shortcut icon" href="https://xxy150310git.github.io/favicon.ico?v=1774269184343">
-<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://xxy150310git.github.io/favicon.ico?v=1774270263081">
 <link rel="stylesheet" href="https://xxy150310git.github.io/styles/main.css">
-<link rel="alternate" type="application/atom+xml" title="abcd12345678 第八期入门赛赛后总结 | xxy150310`s blog - Atom Feed" href="https://xxy150310git.github.io/atom.xml">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 
 
 
@@ -19,92 +26,75 @@ AC code:
 #include &lt;iostream&gt;
 ..." />
     <meta name="keywords" content="abcd12345678,赛后总结,入门赛,题解" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
-    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
   </head>
   <body>
-    <div class="main">
-      <div class="main-content">
-        <div class="site-header">
-  <a href="https://xxy150310git.github.io">
-  <img class="avatar" src="https://xxy150310git.github.io/images/avatar.png?v=1774269184343" alt="">
-  </a>
-  <h1 class="site-title">
-    xxy150310`s blog
-  </h1>
-  <p class="site-description">
-    这里是xxy150310的个人blog
-  </p>
-  <div class="menu-container">
-    
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://xxy150310git.github.io">
+        <img src="https://xxy150310git.github.io/images/avatar.png?v=1774270263081" class="site-logo">
+        <h1 class="site-title">xxy150310`s blog</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
       
-        <a href="/" class="menu">
-          首页
-        </a>
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
       
-    
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
       
-        <a href="/archives" class="menu">
-          归档
-        </a>
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
       
-    
-      
-        <a href="/tags" class="menu">
-          标签
-        </a>
-      
-    
+    </div>
   </div>
-  <div class="social-container">
-    
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
       
-    
+        
       
-    
+        
       
-    
+        
       
-    
+        
       
-    
+        
+      
+    </div>
+    <div class="site-description">
+      这里是xxy150310的个人blog
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://xxy150310git.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
   </div>
 </div>
 
-        <div class="post-detail">
-          <article class="post">
-            <h2 class="post-title">
-              abcd12345678 第八期入门赛赛后总结
-            </h2>
-            <div class="post-info">
-              <span>
-                2026-03-23
-              </span>
-              <span>
-                5 min read
-              </span>
-              
-                <a href="https://xxy150310git.github.io/tag/98G0Z7DvXN/" class="post-tag">
-                  # abcd12345678
-                </a>
-              
-                <a href="https://xxy150310git.github.io/tag/iR14HU9bXzx/" class="post-tag">
-                  # 赛后总结
-                </a>
-              
-                <a href="https://xxy150310git.github.io/tag/W0wSxTlWjY5/" class="post-tag">
-                  # 入门赛
-                </a>
-              
-                <a href="https://xxy150310git.github.io/tag/w0UGFlMGo9/" class="post-tag">
-                  # 题解
-                </a>
-              
-            </div>
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">abcd12345678 第八期入门赛赛后总结</h2>
+            <div class="post-date">2026-03-23</div>
             
-            <div class="post-content-wrapper">
-              <div class="post-content">
-                <h2 id="先告个别这是倒数第三期入门赛">先告个别：这是倒数第三期入门赛</h2>
+            <div class="post-content" v-pre>
+              <h2 id="先告个别这是倒数第三期入门赛">先告个别：这是倒数第三期入门赛</h2>
 <p>本次比赛有4人报名，3人有分，其中各个题目数据如下：<br>
 ###A题：计算器<br>
 本题满分120分，平均得分四舍五入为63.33分，略低于预期。<br>
@@ -331,83 +321,65 @@ int main() {
 <p>###E题：Who Can try?<br>
 本题满分100分，平均得分四舍五入为16.67分，符合预期。</p>
 
-              </div>
-              <div class="toc-container">
-                <ul class="markdownIt-TOC">
-<li>
-<ul>
-<li><a href="#%E5%85%88%E5%91%8A%E4%B8%AA%E5%88%AB%E8%BF%99%E6%98%AF%E5%80%92%E6%95%B0%E7%AC%AC%E4%B8%89%E6%9C%9F%E5%85%A5%E9%97%A8%E8%B5%9B">先告个别：这是倒数第三期入门赛</a></li>
-</ul>
-</li>
-</ul>
-
-              </div>
             </div>
-          </article>
-        </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://xxy150310git.github.io/tag/98G0Z7DvXN/" class="tag">
+                    abcd12345678
+                  </a>
+                
+                  <a href="https://xxy150310git.github.io/tag/iR14HU9bXzx/" class="tag">
+                    赛后总结
+                  </a>
+                
+                  <a href="https://xxy150310git.github.io/tag/W0wSxTlWjY5/" class="tag">
+                    入门赛
+                  </a>
+                
+                  <a href="https://xxy150310git.github.io/tag/w0UGFlMGo9/" class="tag">
+                    题解
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://xxy150310git.github.io/post/zhu-xing-fu-sai-ding-feng-xiang-jian/">
+                  <h3 class="post-title">
+                    逐星赴赛，顶峰相见
+                  </h3>
+                </a>
+              </div>
+            
 
-        
-          <div class="next-post">
-            <div class="next">下一篇</div>
-            <a href="https://xxy150310git.github.io/post/zhu-xing-fu-sai-ding-feng-xiang-jian/">
-              <h3 class="post-title">
-                逐星赴赛，顶峰相见
-              </h3>
-            </a>
+            
+
           </div>
-        
 
-        
-
-        <div class="site-footer">
-  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
-  <a class="rss" href="https://xxy150310git.github.io/atom.xml" target="_blank">
-    <i class="ri-rss-line"></i> RSS
-  </a>
-</div>
-
+        </div>
       </div>
     </div>
 
-    <script>
-      hljs.initHighlightingOnLoad()
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
 
-      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+AOS.init();
 
-      // This should probably be throttled.
-      // Especially because it triggers during smooth scrolling.
-      // https://lodash.com/docs/4.17.10#throttle
-      // You could do like...
-      // window.addEventListener("scroll", () => {
-      //    _.throttle(doThatStuff, 100);
-      // });
-      // Only not doing it here to keep this Pen dependency-free.
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
 
-      window.addEventListener("scroll", event => {
-        let fromTop = window.scrollY;
+</script>
 
-        mainNavLinks.forEach((link, index) => {
-          let section = document.getElementById(decodeURI(link.hash).substring(1));
-          let nextSection = null
-          if (mainNavLinks[index + 1]) {
-            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
-          }
-          if (section.offsetTop <= fromTop) {
-            if (nextSection) {
-              if (nextSection.offsetTop > fromTop) {
-                link.classList.add("current");
-              } else {
-                link.classList.remove("current");    
-              }
-            } else {
-              link.classList.add("current");
-            }
-          } else {
-            link.classList.remove("current");
-          }
-        });
-      });
 
-    </script>
+
+
+
+
   </body>
 </html>
