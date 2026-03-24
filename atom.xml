@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://xxy150310git.github.io</id>
     <title>xxy150310`s blog</title>
-    <updated>2026-03-23T12:51:22.874Z</updated>
+    <updated>2026-03-24T12:38:43.114Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://xxy150310git.github.io"/>
     <link rel="self" href="https://xxy150310git.github.io/atom.xml"/>
@@ -10,6 +10,16 @@
     <logo>https://xxy150310git.github.io/images/avatar.png</logo>
     <icon>https://xxy150310git.github.io/favicon.ico</icon>
     <rights>All rights reserved 2026, xxy150310`s blog</rights>
+    <entry>
+        <title type="html"><![CDATA[成绩查询系统即将搬家]]></title>
+        <id>https://xxy150310git.github.io/post/cheng-ji-cha-xun-xi-tong-ji-jiang-ban-jia/</id>
+        <link href="https://xxy150310git.github.io/post/cheng-ji-cha-xun-xi-tong-ji-jiang-ban-jia/">
+        </link>
+        <updated>2026-03-24T12:35:02.000Z</updated>
+        <content type="html"><![CDATA[<p>成绩查询系统即将搬至blog左侧标签栏，在一段时间内点击会404， 但是在清明假期前会完工</p>
+<p>完工之日会再发一个帖子</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[辗转相除法（欧几里得算法）总结]]></title>
         <id>https://xxy150310git.github.io/post/zhan-zhuan-xiang-chu-fa-ou-ji-li-de-suan-fa-zong-jie/</id>
@@ -1075,28 +1085,6 @@ int main(){
     }
     cout&lt;&lt;ans;
     return 0;
-}
-</code></pre>
-<p>(注:请勿直接抄袭题解)</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[[202601 abcd12345678 一级]计算矩形边长题解]]></title>
-        <id>https://xxy150310git.github.io/post/202601-abcd12345678-yi-ji-ji-suan-ju-xing-bian-chang-ti-jie/</id>
-        <link href="https://xxy150310git.github.io/post/202601-abcd12345678-yi-ji-ji-suan-ju-xing-bian-chang-ti-jie/">
-        </link>
-        <updated>2026-03-22T12:03:52.000Z</updated>
-        <content type="html"><![CDATA[<p>#题目大意<br>
-给你一个长方形的长和宽，要你求它的周长</p>
-<p>#解题思路<br>
-代入长方形周长公式((a+b)×2)求解即可</p>
-<p>核心代码</p>
-<pre><code class="language-cpp">#include&lt;bits/stdc++.h&gt;
-using namespace std;
-int main(){
-    int a,b;
-    cin&gt;&gt;a&gt;&gt;b;
-    cout&lt;&lt;&quot;S=&quot;&lt;&lt;(a+b)*2;
 }
 </code></pre>
 <p>(注:请勿直接抄袭题解)</p>
