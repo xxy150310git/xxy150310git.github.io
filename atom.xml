@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://xxy150310git.github.io</id>
     <title>xxy150310`s blog</title>
-    <updated>2026-03-24T12:43:57.065Z</updated>
+    <updated>2026-03-24T12:58:48.181Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://xxy150310git.github.io"/>
     <link rel="self" href="https://xxy150310git.github.io/atom.xml"/>
@@ -30,28 +30,28 @@
 <p>辗转相除法，又称<strong>欧几里得算法</strong>，是用于快速计算两个正整数**最大公约数（gcd）**的经典算法。</p>
 <h2 id="二-核心原理">二、核心原理</h2>
 <p>核心公式：<br>
-[<br>
-\gcd(a,\ b) = \gcd(b,\ a\bmod b)<br>
-]<br>
+<span class='katex-error' title='ParseError: KaTeX parse error: Undefined control sequence: \[ at position 1: \̲[̲'>\[</span><br>
+<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>gcd</mi><mo>⁡</mo><mo>(</mo><mi>a</mi><mo separator="true">,</mo><mtext> </mtext><mi>b</mi><mo>)</mo><mo>=</mo><mi>gcd</mi><mo>⁡</mo><mo>(</mo><mi>b</mi><mo separator="true">,</mo><mtext> </mtext><mi>a</mi><mtext> </mtext><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">d</mi></mrow><mtext> </mtext><mi>b</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">\gcd(a,\ b) = \gcd(b,\ a\bmod b)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop"><span style="margin-right:0.01389em;">g</span>cd</span><span class="mopen">(</span><span class="mord mathdefault">a</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mspace"> </span><span class="mord mathdefault">b</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop"><span style="margin-right:0.01389em;">g</span>cd</span><span class="mopen">(</span><span class="mord mathdefault">b</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mspace"> </span><span class="mord mathdefault">a</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mspace" style="margin-right:0.05555555555555555em;"></span><span class="mbin"><span class="mord"><span class="mord mathrm">m</span><span class="mord mathrm">o</span><span class="mord mathrm">d</span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mspace" style="margin-right:0.05555555555555555em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault">b</span><span class="mclose">)</span></span></span></span><br>
+<span class='katex-error' title='ParseError: KaTeX parse error: Can&#039;t use function &#039;\]&#039; in math mode at position 1: \̲]̲'>\]</span><br>
 不断用<strong>较大数对较小数取余</strong>，重复替换，直到余数为 0，此时的<strong>非零数</strong>即为最大公约数。</p>
 <h2 id="三-算法步骤">三、算法步骤</h2>
-<p>设求 (a,b) 的最大公约数，不妨设 (a \ge b)：</p>
+<p>设求$ (a,b) $的最大公约数，不妨设 <span class='katex-error' title='ParseError: KaTeX parse error: Can&#039;t use function &#039;\(&#039; in math mode at position 1: \̲(̲a \ge b\)'>\(a \ge b\)</span>：</p>
 <ol>
-<li>计算 (r = a \bmod b)</li>
-<li>若 (r = 0)，则 (b) 就是最大公约数</li>
-<li>若 (r \neq 0)，令 (a = b,\ b = r)，回到第 1 步继续计算</li>
+<li>计算$ (r = a \bmod b)$</li>
+<li>若 <span class='katex-error' title='ParseError: KaTeX parse error: Can&#039;t use function &#039;\(&#039; in math mode at position 1: \̲(̲r = 0\)'>\(r = 0\)</span>，则 <span class='katex-error' title='ParseError: KaTeX parse error: Can&#039;t use function &#039;\(&#039; in math mode at position 1: \̲(̲b\)'>\(b\)</span> 就是最大公约数</li>
+<li>若 <span class='katex-error' title='ParseError: KaTeX parse error: Can&#039;t use function &#039;\(&#039; in math mode at position 1: \̲(̲r \neq 0\)'>\(r \neq 0\)</span>，令 <span class='katex-error' title='ParseError: KaTeX parse error: Can&#039;t use function &#039;\(&#039; in math mode at position 1: \̲(̲a = b,\ b = r\)'>\(a = b,\ b = r\)</span>，回到第 1 步继续计算</li>
 </ol>
 <h2 id="四-重要性质">四、重要性质</h2>
 <ol>
 <li>
 <p><strong>时间复杂度</strong><br>
-接近对数级别 (O(\log(\min(a,b))))，计算速度极快。</p>
+接近对数级别$ (O(\log(\min(a,b))))$，计算速度极快。</p>
 </li>
 <li>
 <p><strong>与最小公倍数的关系</strong><br>
-[<br>
-\text{lcm}(a,b) = \frac{a\times b}{\gcd(a,b)}<br>
-]</p>
+<span class='katex-error' title='ParseError: KaTeX parse error: Undefined control sequence: \[ at position 1: \̲[̲'>\[</span><br>
+<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mtext>lcm</mtext><mo>(</mo><mi>a</mi><mo separator="true">,</mo><mi>b</mi><mo>)</mo><mo>=</mo><mfrac><mrow><mi>a</mi><mo>×</mo><mi>b</mi></mrow><mrow><mi>gcd</mi><mo>⁡</mo><mo>(</mo><mi>a</mi><mo separator="true">,</mo><mi>b</mi><mo>)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">\text{lcm}(a,b) = \frac{a\times b}{\gcd(a,b)}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">lcm</span></span><span class="mopen">(</span><span class="mord mathdefault">a</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">b</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.400108em;vertical-align:-0.52em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8801079999999999em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mop mtight"><span style="margin-right:0.01389em;">g</span>cd</span><span class="mopen mtight">(</span><span class="mord mathdefault mtight">a</span><span class="mpunct mtight">,</span><span class="mord mathdefault mtight">b</span><span class="mclose mtight">)</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight">a</span><span class="mbin mtight">×</span><span class="mord mathdefault mtight">b</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.52em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span><br>
+<span class='katex-error' title='ParseError: KaTeX parse error: Can&#039;t use function &#039;\]&#039; in math mode at position 1: \̲]̲'>\]</span></p>
 </li>
 <li>
 <p><strong>扩展欧几里得算法基础</strong><br>
@@ -59,7 +59,7 @@
 </li>
 <li>
 <p><strong>互质判定</strong><br>
-若 (\gcd(a,b)=1)，则 (a,b) 互质。</p>
+若 <span class='katex-error' title='ParseError: KaTeX parse error: Can&#039;t use function &#039;\(&#039; in math mode at position 1: \̲(̲\gcd(a,b)=1\)'>\(\gcd(a,b)=1\)</span>，则 <span class='katex-error' title='ParseError: KaTeX parse error: Can&#039;t use function &#039;\(&#039; in math mode at position 1: \̲(̲a,b\)'>\(a,b\)</span> 互质。</p>
 </li>
 </ol>
 <h2 id="五-适用场景">五、适用场景</h2>
