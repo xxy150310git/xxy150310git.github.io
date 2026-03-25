@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://xxy150310git.github.io</id>
     <title>xxy150310`s blog</title>
-    <updated>2026-03-25T12:58:36.212Z</updated>
+    <updated>2026-03-25T13:21:55.125Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://xxy150310git.github.io"/>
     <link rel="self" href="https://xxy150310git.github.io/atom.xml"/>
@@ -10,6 +10,17 @@
     <logo>https://xxy150310git.github.io/images/avatar.png</logo>
     <icon>https://xxy150310git.github.io/favicon.ico</icon>
     <rights>All rights reserved 2026, xxy150310`s blog</rights>
+    <entry>
+        <title type="html"><![CDATA[关于团队4月认证时间确定的通知]]></title>
+        <id>https://xxy150310git.github.io/post/guan-yu-tuan-dui-4-yue-ren-zheng-shi-jian-que-ding-de-tong-zhi/</id>
+        <link href="https://xxy150310git.github.io/post/guan-yu-tuan-dui-4-yue-ren-zheng-shi-jian-que-ding-de-tong-zhi/">
+        </link>
+        <updated>2026-03-25T13:14:21.000Z</updated>
+        <content type="html"><![CDATA[<p>本次认证时间将定于4月12日，考点在团队内文件处。</p>
+<p>本次认证支持语言：C++、Python、Java、Scratch。其中，C++、Python、Java包含1<sub>8级，Scratch包含1</sub>4级，报名入口https://www.wjx.top/vm/rX2ZdAf.aspx# 。</p>
+<p>4月5日~4月12日将开启模拟认证，位置在blog左侧，用于为考生提前熟悉考试界面。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[归去归去 第一章]]></title>
         <id>https://xxy150310git.github.io/post/gui-qu-gui-qu/</id>
@@ -1037,52 +1048,6 @@ TT_chen 看向 xxy150310，第一次认真地说：“你比我稳。”</p>
 </tr>
 </tbody>
 </table>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[[202601 abcd12345678 三级]学生成绩分析题解]]></title>
-        <id>https://xxy150310git.github.io/post/202601-abcd12345678-san-ji-xue-sheng-cheng-ji-fen-xi-ti-jie/</id>
-        <link href="https://xxy150310git.github.io/post/202601-abcd12345678-san-ji-xue-sheng-cheng-ji-fen-xi-ti-jie/">
-        </link>
-        <updated>2026-03-22T12:06:36.000Z</updated>
-        <content type="html"><![CDATA[<p>#题目大意<br>
-给你一些学生的分数，要你求他们的平均分、最低分、最高分、高于平均分人数。</p>
-<p>#解题思路<br>
-1.求平均分：累加学生分数得到总分，再用总分除以人数。</p>
-<p>2.求最大最小值：每次输入将max与分数取最大值，min与分数取最小值。</p>
-<p>3.高于平均分人数：遍历学生分数，将学生分数与平均分比较，若高于平均分则让高于平均分人数++。</p>
-<p>#核心代码</p>
-<pre><code class="language-cpp">
-#include&lt;iostream&gt;
-#include&lt;algorithm&gt;
-#include&lt;iomanip&gt;
-//考试别用万能头
-using namespace std;
-int a[105];//学生成绩
-int main(){
-    //freopen(&quot;---.in&quot;,&quot;r&quot;,stdin);
-    //freopen(&quot;---.out&quot;,&quot;w&quot;,stdout);
-    //不写freopen见祖宗
-    int n,ma=0,mi=101,h=0;
-    cin&gt;&gt;n;
-    for(int i=1;i&lt;=n;i++){
-        cin&gt;&gt;a[i];
-        h+=a[i];//求和
-        ma=max(ma,a[i]);
-        mi=min(mi,a[i]);
-    }
-    double av=h*1.0/n;//平均数=数列之和÷数列长度
-    int r=0;
-    for(int i=1;i&lt;=n;i++){
-        if(a[i]&gt;av)r++;//计算大于平均分人数
-    }
-    cout&lt;&lt;&quot;Average: &quot;&lt;&lt;fixed&lt;&lt;setprecision(1)&lt;&lt;h*1.0/n&lt;&lt;endl;
-    cout&lt;&lt;&quot;Max: &quot;&lt;&lt;ma&lt;&lt;&quot;, Min: &quot;&lt;&lt;mi&lt;&lt;endl;
-    cout&lt;&lt;&quot;Above average: &quot;&lt;&lt;r;
-    return 0;//好习惯
-}
-</code></pre>
-<p>(注:请勿直接抄袭题解)</p>
 ]]></content>
     </entry>
 </feed>
