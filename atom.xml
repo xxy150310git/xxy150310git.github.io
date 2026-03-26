@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://xxy150310git.github.io</id>
     <title>xxy150310`s blog</title>
-    <updated>2026-03-25T13:21:55.125Z</updated>
+    <updated>2026-03-26T13:32:15.141Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://xxy150310git.github.io"/>
     <link rel="self" href="https://xxy150310git.github.io/atom.xml"/>
@@ -10,6 +10,15 @@
     <logo>https://xxy150310git.github.io/images/avatar.png</logo>
     <icon>https://xxy150310git.github.io/favicon.ico</icon>
     <rights>All rights reserved 2026, xxy150310`s blog</rights>
+    <entry>
+        <title type="html"><![CDATA[关于成绩查询系统正式上线blog的通知]]></title>
+        <id>https://xxy150310git.github.io/post/guan-yu-cheng-ji-cha-xun-xi-tong-zheng-shi-shang-xian-blog-de-tong-zhi/</id>
+        <link href="https://xxy150310git.github.io/post/guan-yu-cheng-ji-cha-xun-xi-tong-zheng-shi-shang-xian-blog-de-tong-zhi/">
+        </link>
+        <updated>2026-03-26T13:30:53.000Z</updated>
+        <content type="html"><![CDATA[<p>2026年3月26日，成绩查询系统上线blog了！点击左侧即可进入！</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[关于团队4月认证时间确定的通知]]></title>
         <id>https://xxy150310git.github.io/post/guan-yu-tuan-dui-4-yue-ren-zheng-shi-jian-que-ding-de-tong-zhi/</id>
@@ -1004,50 +1013,6 @@ TT_chen 看向 xxy150310，第一次认真地说：“你比我稳。”</p>
 <p>星轨之上，他们的故事，才刚刚启程。</p>
 <p>（全文完，<a href="https://www.luogu.com.cn/article/y17ipy33">后续</a>）</p>
 <p>(注：本文使用了豆包AI辅助写作)</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[”极客杯“闪亮登场]]></title>
-        <id>https://xxy150310git.github.io/post/ji-ke-bei-shan-liang-deng-chang/</id>
-        <link href="https://xxy150310git.github.io/post/ji-ke-bei-shan-liang-deng-chang/">
-        </link>
-        <updated>2026-03-22T12:10:45.000Z</updated>
-        <content type="html"><![CDATA[<p>极客杯是 abcd12345678 团队内部的一场算法友谊赛。比赛旨在为团队成员提供一个切磋技术、交流思路、共同进步的平台。</p>
-<p>这是属于我们自己的比赛，无论水平高低，重在参与，乐在成长！</p>
-<table>
-<thead>
-<tr>
-<th style="text-align:right"></th>
-<th style="text-align:right">内容</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:right">比赛名称</td>
-<td style="text-align:right">abcd12345678 团队内部赛 · 极客杯</td>
-</tr>
-<tr>
-<td style="text-align:right">英文简称</td>
-<td style="text-align:right">GC (Geek Cup)</td>
-</tr>
-<tr>
-<td style="text-align:right">比赛时间</td>
-<td style="text-align:right">每个奇数月进行一次</td>
-</tr>
-<tr>
-<td style="text-align:right">比赛时长</td>
-<td style="text-align:right">初赛笔试1小时，复赛笔试1小时，决赛上机编程3小时</td>
-</tr>
-<tr>
-<td style="text-align:right">题目数量</td>
-<td style="text-align:right">不定</td>
-</tr>
-<tr>
-<td style="text-align:right">难度定位</td>
-<td style="text-align:right">入门~普及/提高-</td>
-</tr>
-</tbody>
-</table>
 ]]></content>
     </entry>
 </feed>
