@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>成绩查询系统 - 仿洛谷咕值系统</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --bg: #f5f5f5;
+            --card: #fff;
+            --text: #333;
+            --border: #ddd;
+            --thead: #f8f9fa;
+            --hover: #f1f7ff;
+        }
+        .dark {
+            --bg: #1a1a1a;
+            --card: #2a2a2a;
+            --text: #eee;
+            --border: #444;
+            --thead: #333;
+            --hover: #3a3a5a;
+        }
+
+        * {margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
+        body {background:var(--bg);color:var(--text);padding:20px;transition:0.3s;}
+        .container {max-width:1200px;margin:0 auto;background:var(--card);padding:30px;border-radius:8px;box-shadow:0 0 10px rgba(0,0,0,0.1);border:1px solid var(--border);}
+        h1 {text-align:center;color:var(--text);margin-bottom:30px;}
+        .theme-switch {text-align:right;margin-bottom:15px;}
+        .theme-btn {background:#6c757d;color:#fff;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;}
+        
+        .refresh-btn {background:#28a745;margin-bottom:20px;}
+        .refresh-btn:hover {background:#218838;}
+        .week-btn {background:#ff6b6b;margin-left:10px;}
+        .week-btn:hover {background:#e55353;}
+        .week-switch {display:flex;gap:8px;margin:10px 0;flex-wrap:wrap;}
+        .week-switch button {padding:6px 10px;font-size:14px;background:#6c757d;}
+        .week-switch button.active {background:#007bff;}
+        .search-box {display:flex;gap:10px;margin-bottom:20px;position:relative;flex-wrap:wrap;}
+        #nameInput {flex:1;padding:10px;font-size:16px;border:1px solid var(--border);border-radius:4px;background:var(--card);color:var(--text);}
+        button {padding:10px 20px;background:#007bff;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:16px;}
+        button:hover {background:#0056b3;}
+        .export-btn {background:#17a2b8;}
+        .export-btn:hover {background:#138496;}
+
+        .chart-area {margin:30px 0;height:400px;border:1px solid var(--border);border-radius:8px;padding:10px;display:none;}
+        .stats-area,.guzhi-area,.week-area {margin:20px 0;padding:20px;border:1px solid var(--border);border-radius:8px;display:none;}
+        .stats-area h3,.guzhi-area h3,.week-area h3 {color:var(--text);margin-bottom:10px;}
+        .stats-item,.guzhi-item,.week-item {font-size:18px;margin:8px 0;}
+        .stats-item span,.guzhi-item span,.week-item span {color:#007bff;font-weight:bold;}
+
+        /* 周报样式 */
+        .week-days {display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;}
+        .day-box {width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:4px;background:#e9ecef;color:#333;font-weight:bold;}
+        .day-ok {background:#28a745;color:white;}
+        .week-desc {padding:12px;border-left:4px solid #007bff;background:var(--hover);margin:10px 0;font-size:16px;}
+        .week-list {margin-top:10px;max-height:220px;overflow-y:auto;}
+        .week-item {padding:6px 0;border-bottom:1px dashed var(--border);}
+
+        .rank-select {margin:20px 0;}
+        .rank-select label {margin-right:20px;cursor:pointer;}
+        .rank-area,.guzhi-rank-area {margin:30px 0;display:none;}
+        .rank-area h3,.guzhi-rank-area h3 {color:var(--text);margin-bottom:15px;}
+        .rank-table,.guzhi-rank-table {width:100%;border-collapse:collapse;}
+        .rank-table th, .rank-table td,
+        .guzhi-rank-table th, .guzhi-rank-table td {padding:12px;text-align:center;border-bottom:1px solid var(--border);color:var(--text);}
+        .rank-table th, .guzhi-rank-table th {background:var(--thead);}
+        .rank-table .my-rank, .guzhi-rank-table .my-rank {background:#fff3cd;color:#856404;font-weight:bold;}
+        .rank-table tr:hover,.guzhi-rank-table tr:hover {background:var(--hover) !important;transition:0.2s;}
+        .no-data {color:var(--text);text-align:center;padding:20px;}
+        .admin-link {text-align:center;margin-top:30px;}
+        .admin-link a {color:#007bff;text-decoration:none;}
+        .tips {text-align:center;color:var(--text);font-size:14px;margin-top:10px;}
+
+        /* 自动提示下拉框 */
+        .suggest-box {
+            position:absolute;top:44px;left:0;right:0;
+            background:var(--card);border:1px solid var(--border);
+            border-radius:4px;max-height:200px;overflow-y:auto;
+            z-index:999;display:none;
+        }
+        .suggest-item {padding:8px 12px;cursor:pointer;}
+        .suggest-item:hover {background:var(--hover);}
+
+        /* 颜色 + 发光 + 图标 */
+        .name-gray { color: #999 !important; }
+        .name-blue { color: #4488FF !important; }
+        .name-green { color: #00CC00 !important; }
+        .name-yellow { color: #FFCC00 !important; }
+        .name-orange { color: #FF8800 !important; }
+        .name-red { color: #FF0000 !important; }
+        .name-admin { color: #9370DB !important; font-weight: bold; }
+        .name-gray:hover,.name-blue:hover,.name-green:hover,.name-yellow:hover,
+        .name-orange:hover,.name-red:hover,.name-admin:hover {
+            filter: brightness(1.3);
+            transition: all 0.2s ease;
+        }
+        .user-tag {
+            font-size:12px;padding:1px 5px;border-radius:3px;
+            background:#9370DB;color:#fff !important;
+            margin-left:6px;font-weight:normal;
+        }
+        .level-icon {
+            font-size:12px;margin-right:4px;font-weight:bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="theme-switch">
+            <button class="theme-btn" onclick="toggleDark()">切换暗黑/浅色模式</button>
+        </div>
+        <h1>成绩查询系统 - 仿洛谷咕值系统</h1>
+
+        <button class="refresh-btn" onclick="refreshAllData()">🔄 加载最新成绩&咕值数据</button>
+        <button class="week-btn" onclick="showWeekReport(0)">📊 查看周报</button>
+
+        <!-- 周数切换 -->
+        <div class="week-switch" id="weekSwitch" style="display:none;">
+            <button onclick="showWeekReport(0)" class="week-btn-0 active">本周</button>
+            <button onclick="showWeekReport(1)" class="week-btn-1">第1周</button>
+            <button onclick="showWeekReport(2)" class="week-btn-2">第2周</button>
+            <button onclick="showWeekReport(3)" class="week-btn-3">第3周</button>
+            <button onclick="showWeekReport(4)" class="week-btn-4">第4周</button>
+        </div>
+
+        <div class="search-box">
+            <input type="text" id="nameInput" placeholder="请输入姓名查询成绩&咕值" autocomplete="off">
+            <div class="suggest-box" id="suggestBox"></div>
+            <button onclick="searchScore()">查询成绩&咕值</button>
+            <button class="export-btn" onclick="exportAllRank()">导出全部排名</button>
+        </div>
+
+        <div class="rank-select" id="rankSelect" style="display:none;">
+            <label><input type="radio" name="rankType" value="total" checked> 按总分排名</label>
+            <label><input type="radio" name="rankType" value="avg"> 按平均分排名</label>
+            <button onclick="refreshRank()">刷新成绩排名</button>
+            <button onclick="refreshGuzhiRank()" style="margin-left:20px;">刷新咕值排名</button>
+        </div>
+
+        <!-- 周报面板 -->
+        <div class="week-area" id="weekArea">
+            <h3 id="weekTitle">📅 本周比赛周报</h3>
+            <div class="week-item">本周参赛天数：<span id="weekDays">0</span>/7 天</div>
+            <div class="week-item">本周比赛总场数：<span id="weekCount">0</span> 场</div>
+            <div class="week-item">本周平均分：<span id="weekAvg">0</span> 分</div>
+            <div class="week-days" id="weekDaysBox"></div>
+            <div class="week-desc" id="weekDesc"></div>
+            <div class="week-list" id="weekList"></div>
+        </div>
+
+        <div class="stats-area" id="statsArea">
+            <h3 id="statsTitle"></h3>
+            <div class="stats-item">个人平均分：<span id="userAvg">0</span></div>
+            <div class="stats-item">最高成绩：<span id="userMax" style="color:#28a745">0</span></div>
+            <div class="stats-item">最低成绩：<span id="userMin" style="color:#dc3545">0</span></div>
+            <div class="stats-item">成绩排名：<span id="userRank">0</span> / <span id="totalUser">0</span></div>
+        </div>
+
+        <div class="guzhi-area" id="guzhiArea">
+            <h3 id="guzhiTitle"></h3>
+            <div class="guzhi-item">比赛咕值（平均分取整）：<span id="userMatchGuzhi">0</span></div>
+            <div class="guzhi-item">基础信用：<span id="userBaseCredit">0</span></div>
+            <div class="guzhi-item">练习情况：<span id="userPractice">0</span></div>
+            <div class="guzhi-item">成就：<span id="userAchievement">0</span></div>
+            <div class="guzhi-item">社区贡献：<span id="userCommunity">0</span></div>
+            <div class="guzhi-item" style="font-weight:bold;margin-top:15px;">咕值总分：<span id="userTotalGuzhi">0</span></div>
+            <div class="guzhi-item">咕值排名：<span id="userGuzhiRank">0</span> / <span id="totalGuzhiUser">0</span></div>
+        </div>
+
+        <div class="chart-area" id="chartArea"></div>
+
+        <div class="rank-area" id="rankArea">
+            <h3 id="rankTitle">总成绩排名（降序）</h3>
+            <table class="rank-table">
+                <thead>
+                    <tr>
+                        <th>排名</th><th>用户名</th><th>参与比赛数</th>
+                        <th id="rankCol4">总分</th><th id="rankCol5">平均分</th>
+                    </tr>
+                </thead>
+                <tbody id="rankBody"></tbody>
+            </table>
+        </div>
+
+        <div class="guzhi-rank-area" id="guzhiRankArea">
+            <h3 id="guzhiRankTitle">咕值总分排名（降序）</h3>
+            <table class="guzhi-rank-table">
+                <thead>
+                    <tr>
+                        <th>排名</th><th>用户名</th><th>比赛咕值</th><th>基础信用</th>
+                        <th>练习情况</th><th>成就</th><th>社区贡献</th><th>咕值总分</th>
+                    </tr>
+                </thead>
+                <tbody id="guzhiRankBody"></tbody>
+            </table>
+        </div>
+
+        <div class="admin-link"><a href="https://xxy150310git.github.io/">返回blog</a></div>
+        <div class="tips">支持回车查询 | 自动提示 | 暗黑模式 | 历史周报 | 导出Excel</div>
+    </div>
+
+    <script>
+        let scoreData = [];
+        let userGuzhiConfig = [];
+        let currentUser = '';
+        let userScores = [];
+        let userStats = {};
+        let userGuzhi = {};
+        let allUserStats = [];
+        let allUserGuzhi = [];
+        let allNames = [];
+
+        // 暗黑模式
+        function toggleDark() {
+            document.body.classList.toggle('dark');
+            localStorage.setItem('dark', document.body.classList.contains('dark'));
+        }
+
+        // 等级图标
+        function getLevelIcon(guzhi) {
+            if(guzhi >= 380) return '[Lv.7]';
+            if(guzhi >= 230) return '[Lv.6]';
+            if(guzhi >= 170) return '[Lv.5]';
+            if(guzhi >= 120) return '[Lv.4]';
+            if(guzhi >= 100) return '[Lv.3]';
+            return '[Lv.1]';
+        }
+
+        // 颜色与标签
+        function getUserNameClass(guzhi, username) {
+            const adminList = ["xxy150310", "TT_chen", "Double_G"];
+            if (adminList.includes(username.trim())) return "name-admin";
+            if (guzhi >= 0 && guzhi <= 99) return "name-gray";
+            if (guzhi >= 100 && guzhi <= 119) return "name-blue";
+            if (guzhi >= 120 && guzhi <= 169) return "name-green";
+            if (guzhi >= 170 && guzhi <= 229) return "name-yellow";
+            if (guzhi >= 230 && guzhi <= 379) return "name-orange";
+            if (guzhi >= 380 && guzhi <= 500) return "name-red";
+            return "name-gray";
+        }
+        function getUserTag(username) {
+            const tagMap = {"xxy150310":"AM","TT_chen":"TT","Double_G":"C++\"小白\""};
+            return tagMap[username] || "";
+        }
+        function renderName(username, guzhi) {
+            let cls = getUserNameClass(guzhi, username);
+            let tag = getUserTag(username);
+            let icon = getLevelIcon(guzhi);
+            let tagHtml = tag ? `<span class="user-tag">${tag}</span>` : "";
+            return `<span class="level-icon">${icon}</span><span class="${cls}">${username}</span>${tagHtml}`;
+        }
+
+        // 自动提示
+        function initSuggest() {
+            const input = document.getElementById('nameInput');
+            const box = document.getElementById('suggestBox');
+            input.addEventListener('input', function() {
+                const kw = this.value.trim().toLowerCase();
+                if(kw.length < 1 || allNames.length === 0) { box.style.display='none'; return; }
+                const matches = allNames.filter(n => n.toLowerCase().includes(kw)).slice(0,8);
+                if(matches.length === 0) { box.style.display='none'; return; }
+                box.innerHTML = '';
+                matches.forEach(name => {
+                    const div = document.createElement('div');
+                    div.className = 'suggest-item';
+                    div.textContent = name;
+                    div.onclick = () => { input.value = name; box.style.display='none'; searchScore(); };
+                    box.appendChild(div);
+                });
+                box.style.display = 'block';
+            });
+            document.addEventListener('click', (e) => {
+                if(!input.contains(e.target) && !box.contains(e.target)) box.style.display='none';
+            });
+        }
+
+        // 回车查询
+        document.getElementById('nameInput').addEventListener('keyup', function(e){
+            if(e.key === 'Enter') searchScore();
+        });
+
+        // ====================== 【历史周报功能】 ======================
+        function showWeekReport(weekOffset) {
+            if(!currentUser) { alert("请先查询一位同学的成绩！"); return; }
+            document.getElementById("weekSwitch").style.display = "flex";
+            document.querySelectorAll(".week-switch button").forEach((btn, idx) => {
+                btn.classList.toggle("active", idx === weekOffset);
+            });
+
+            const now = new Date();
+            const startDay = weekOffset * 7;
+            const endDay = startDay + 7;
+            const weekData = [];
+            const dayStatus = Array(7).fill(0);
+
+            userScores.forEach(item => {
+                const d = new Date(item.time);
+                const diff = Math.floor((now - d) / (1000*60*60*24));
+                if(diff >= startDay && diff < endDay) {
+                    weekData.push(item);
+                    const idx = Math.floor(diff - startDay);
+                    if(idx >=0 && idx <7) dayStatus[idx] = 1;
+                }
+            });
+
+            const count = weekData.length;
+            const days = dayStatus.filter(v=>v===1).length;
+            const total = weekData.reduce((s,i)=>s+parseFloat(i.score||0),0);
+            const avg = count>0 ? (total/count).toFixed(1) : "0";
+
+            // 标题
+            const titleMap = ["📅 本周比赛周报","📅 第1周比赛周报","📅 第2周比赛周报","📅 第3周比赛周报","📅 第4周比赛周报"];
+            document.getElementById("weekTitle").innerText = titleMap[weekOffset];
+
+            document.getElementById("weekDays").innerText = days;
+            document.getElementById("weekCount").innerText = count;
+            document.getElementById("weekAvg").innerText = avg;
+
+            // 七天状态
+            let dayHtml = "";
+            for(let i=6;i>=0;i--) dayHtml += `<div class="day-box ${dayStatus[i]?'day-ok':''}">${i==6?'今':6-i}</div>`;
+            document.getElementById("weekDaysBox").innerHTML = dayHtml;
+
+            // 智能文案
+            let desc = "";
+            if(count ===0) desc = "Oops! 这周怎么不见了？快去参加比赛吧～";
+            else if(days ===7) desc = "前方高能，我愿称之为魔法！七天全勤，太强了！";
+            else if(days >=4) desc = "表现优秀！持续努力，未来可期！";
+            else if(days >=2) desc = "继续加油！多参加比赛就能更强！";
+            else desc = "这周有点偷懒啦，记得每天练习哦！";
+            document.getElementById("weekDesc").innerText = desc;
+
+            // 比赛列表
+            let listHtml = "";
+            if(count ===0) listHtml = "<div class='week-item'>本周暂无比赛记录</div>";
+            else weekData.sort((a,b)=>new Date(b.time)-new Date(a.time)).forEach(i=>{
+                listHtml += `<div class='week-item'>${i.time} | ${i.matchName} | 得分：${i.score}</div>`;
+            });
+            document.getElementById("weekList").innerHTML = listHtml;
+            document.getElementById("weekArea").style.display = "block";
+        }
+
+        // 加载数据
+        function refreshAllData() {
+            loadScript('score_data.js', () => {
+                scoreData = window.scoreData || [];
+                loadScript('user_guzhi.js', () => {
+                    userGuzhiConfig = window.userGuzhiConfig || [];
+                    calcAllUserStats();
+                    calcAllUserGuzhi();
+                    
+                    const nameSet = new Set();
+                    allUserStats.forEach(u => nameSet.add(u.name));
+                    allUserGuzhi.forEach(u => nameSet.add(u.name));
+                    allNames = Array.from(nameSet).sort();
+                    
+                    alert(`✅ 加载成功！\n成绩数据：${scoreData.length}条\n咕值配置：${userGuzhiConfig.length}个用户`);
+                });
+            });
+        }
+
+        function loadScript(src, callback) {
+            const oldScripts = document.querySelectorAll(`script[src*="${src}"]`);
+            oldScripts.forEach(script => script.remove());
+            const script = document.createElement('script');
+            script.src = src + '?rand=' + Math.random();
+            script.type = 'text/javascript';
+            script.charset = 'UTF-8';
+            script.onload = callback;
+            script.onerror = () => alert(`加载${src}失败！`);
+            document.body.appendChild(script);
+        }
+
+        function calcAllUserStats() {
+            const userMap = {};
+            scoreData.forEach(item => {
+                if (!userMap[item.name]) userMap[item.name] = {name:item.name,count:0,total:0,avg:0};
+                userMap[item.name].count++;
+                userMap[item.name].total += parseFloat(item.score||0);
+            });
+            allUserStats = Object.values(userMap).map(u => {
+                u.avg = u.count>0 ? (u.total/u.count).toFixed(1) : '0.0';
+                u.total = u.total.toFixed(1);
+                return u;
+            });
+        }
+
+        function calcAllUserGuzhi() {
+            const userMap = {};
+            scoreData.forEach(item => {
+                if (!userMap[item.name]) userMap[item.name] = {name:item.name,count:0,totalScore:0,matchGuzhi:0,baseCredit:0,practice:0,achievement:0,community:0,totalGuzhi:0};
+                userMap[item.name].count++;
+                userMap[item.name].totalScore += parseFloat(item.score||0);
+            });
+            Object.keys(userMap).forEach(name => {
+                const g = userGuzhiConfig.find(i=>i.name.toLowerCase()===name.toLowerCase())||{baseCredit:0,practice:0,achievement:0,community:0};
+                userMap[name].matchGuzhi = userMap[name].count>0 ? Math.round(userMap[name].totalScore/userMap[name].count) : 0;
+                userMap[name].baseCredit = g.baseCredit;
+                userMap[name].practice = g.practice;
+                userMap[name].achievement = g.achievement;
+                userMap[name].community = g.community;
+                userMap[name].totalGuzhi = userMap[name].matchGuzhi + g.baseCredit + g.practice + g.achievement + g.community;
+            });
+            userGuzhiConfig.forEach(g=>{if(!userMap[g.name])userMap[g.name]={name:g.name,count:0,totalScore:0,matchGuzhi:0,baseCredit:g.baseCredit,practice:g.practice,achievement:g.achievement,community:g.community,totalGuzhi:g.baseCredit+g.practice+g.achievement+g.community};});
+            allUserGuzhi = Object.values(userMap);
+        }
+
+        // 查询
+        function searchScore() {
+            currentUser = document.getElementById('nameInput').value.trim();
+            document.getElementById('suggestBox').style.display = 'none';
+            
+            if (!currentUser) {alert('请输入姓名！');return;}
+            if (scoreData.length===0) {alert('请先加载数据！');return;}
+            userScores = scoreData.filter(i=>i.name.toLowerCase().includes(currentUser.toLowerCase())).sort((a,b)=>new Date(a.time)-new Date(b.time));
+            if (userScores.length===0) {
+                alert('暂无成绩记录！');
+                document.getElementById('statsArea').style.display='none';
+                document.getElementById('guzhiArea').style.display='none';
+                document.getElementById('chartArea').style.display='none';
+                document.getElementById('rankArea').style.display='none';
+                document.getElementById('guzhiRankArea').style.display='none';
+                document.getElementById('rankSelect').style.display='none';
+                document.getElementById('weekArea').style.display='none';
+                document.getElementById('weekSwitch').style.display='none';
+                return;
+            }
+            calcUserStats();
+            calcUserGuzhi();
+            document.getElementById('statsArea').style.display='block';
+            document.getElementById('guzhiArea').style.display='block';
+            document.getElementById('chartArea').style.display='block';
+            document.getElementById('rankArea').style.display='block';
+            document.getElementById('guzhiRankArea').style.display='block';
+            document.getElementById('rankSelect').style.display='block';
+            renderUserStats();
+            renderUserGuzhi();
+            renderChart();
+            refreshRank();
+            refreshGuzhiRank();
+        }
+
+        function calcUserStats() {
+            const total = userScores.reduce((s,i)=>s+parseFloat(i.score),0);
+            const avg = (total/userScores.length).toFixed(1);
+            const scores = userScores.map(i=>parseFloat(i.score));
+            const max = Math.max(...scores).toFixed(1);
+            const min = Math.min(...scores).toFixed(1);
+            userStats = {name:currentUser,count:userScores.length,total:total.toFixed(1),avg,max,min};
+        }
+
+        function calcUserGuzhi() {
+            const total = userScores.reduce((s,i)=>s+parseFloat(i.score),0);
+            const match = Math.round(total/userScores.length);
+            const g = userGuzhiConfig.find(i=>i.name.toLowerCase()===currentUser.toLowerCase())||{baseCredit:0,practice:0,achievement:0,community:0};
+            const totalG = match + g.baseCredit + g.practice + g.achievement + g.community;
+            userGuzhi = {matchGuzhi:match,baseCredit:g.baseCredit,practice:g.practice,achievement:g.achievement,community:g.community,totalGuzhi:totalG};
+        }
+
+        function renderUserStats() {
+            document.getElementById('statsTitle').textContent = `${currentUser}的成绩统计`;
+            document.getElementById('userAvg').textContent = userStats.avg;
+            document.getElementById('userMax').textContent = userStats.max;
+            document.getElementById('userMin').textContent = userStats.min;
+            document.getElementById('totalUser').textContent = allUserStats.length;
+        }
+
+        function renderUserGuzhi() {
+            document.getElementById('guzhiTitle').innerHTML = `${renderName(currentUser, userGuzhi.totalGuzhi)}的咕值统计`;
+            document.getElementById('userMatchGuzhi').textContent = userGuzhi.matchGuzhi;
+            document.getElementById('userBaseCredit').textContent = userGuzhi.baseCredit;
+            document.getElementById('userPractice').textContent = userGuzhi.practice;
+            document.getElementById('userAchievement').textContent = userGuzhi.achievement;
+            document.getElementById('userCommunity').textContent = userGuzhi.community;
+            document.getElementById('userTotalGuzhi').textContent = userGuzhi.totalGuzhi;
+            document.getElementById('totalGuzhiUser').textContent = allUserGuzhi.length;
+        }
+
+        // 图表
+        function renderChart() {
+            const dom = document.getElementById('chartArea');
+            const chart = echarts.init(dom);
+            const sorted = [...userScores].sort((a,b)=>new Date(a.time)-new Date(b.time));
+            const x = sorted.map(i=>`${i.time}\n${i.matchName}`);
+            const y = sorted.map(i=>parseFloat(i.score));
+            const opt = {
+                title:{text:`${currentUser}成绩趋势`,left:'center'},
+                tooltip:{trigger:'axis',formatter:p=>`${sorted[p[0].dataIndex].time}<br>${sorted[p[0].dataIndex].matchName}<br>成绩：${sorted[p[0].dataIndex].score}`},
+                grid:{left:'8%',right:'4%',bottom:'25%'},
+                xAxis:{type:'category',data:x,axisLabel:{rotate:60}},
+                yAxis:{type:'value',min:0,max:100},
+                series:[{data:y,type:'line',smooth:true,itemStyle:{color:'#007bff'},lineStyle:{width:3}}]
+            };
+            chart.setOption(opt);
+            window.addEventListener('resize',()=>chart.resize());
+        }
+
+        // 成绩排名
+        function refreshRank() {
+            if (!currentUser) return;
+            const t = document.querySelector('input[name="rankType"]:checked').value;
+            let arr = [...allUserStats];
+            t==='total' ? arr.sort((a,b)=>parseFloat(b.total)-parseFloat(a.total)) : arr.sort((a,b)=>parseFloat(b.avg)-parseFloat(a.avg));
+            document.getElementById('rankTitle').textContent = t==='total'?'总成绩排名（降序）':'平均分排名（降序）';
+            document.getElementById('rankCol4').textContent = t==='total'?'总分':'平均分';
+            const b = document.getElementById('rankBody');
+            b.innerHTML = '';
+            let r = 0;
+            arr.forEach((u,i)=>{
+                const me = u.name.toLowerCase()===currentUser.toLowerCase();
+                if(me)r=i+1;
+                const g = allUserGuzhi.find(x=>x.name.toLowerCase()===u.name.toLowerCase())||{totalGuzhi:0};
+                b.innerHTML+=`<tr class="${me?'my-rank':''}"><td>${i+1}</td><td>${renderName(u.name,g.totalGuzhi)}</td><td>${u.count}</td><td>${t==='total'?u.total:u.avg}</td><td>${u.avg}</td></tr>`;
+            });
+            document.getElementById('userRank').textContent = r;
+        }
+
+        // 咕值排名
+        function refreshGuzhiRank() {
+            if (!currentUser) return;
+            const arr = [...allUserGuzhi].sort((a,b)=>b.totalGuzhi-a.totalGuzhi);
+            const b = document.getElementById('guzhiRankBody');
+            b.innerHTML = '';
+            let r = 0;
+            arr.forEach((u,i)=>{
+                const me = u.name.toLowerCase()===currentUser.toLowerCase();
+                if(me)r=i+1;
+                b.innerHTML+=`<tr class="${me?'my-rank':''}"><td>${i+1}</td><td>${renderName(u.name,u.totalGuzhi)}</td><td>${u.matchGuzhi}</td><td>${u.baseCredit}</td><td>${u.practice}</td><td>${u.achievement}</td><td>${u.community}</td><td>${u.totalGuzhi}</td></tr>`;
+            });
+            document.getElementById('userGuzhiRank').textContent = r;
+        }
+
+        // 导出Excel
+        function exportAllRank() {
+            const ws1 = XLSX.utils.json_to_sheet(allUserStats.map((u,i)=>({排名:i+1,姓名:u.name,参赛数:u.count,总分:u.total,平均分:u.avg})));
+            const ws2 = XLSX.utils.json_to_sheet(allUserGuzhi.map((u,i)=>({排名:i+1,姓名:u.name,比赛咕值:u.matchGuzhi,基础信用:u.baseCredit,练习情况:u.practice,成就:u.achievement,社区贡献:u.community,咕值总分:u.totalGuzhi})));
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb,ws1,"成绩排名");
+            XLSX.utils.book_append_sheet(wb,ws2,"咕值排名");
+            XLSX.writeFile(wb,"成绩咕值排名表.xlsx");
+        }
+
+        // 初始化
+        window.onload = function(){
+            if(localStorage.getItem('dark') === 'true') document.body.classList.add('dark');
+            refreshAllData();
+            initSuggest();
+        };
+    </script>
+</body>
+</html>
