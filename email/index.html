@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>XXY Mail - 私人邮箱系统</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,"Microsoft YaHei"}
+body{background:#f4f7fa}
+.container{max-width:1000px;margin:30px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.05)}
+.header{background:#0071e3;color:white;padding:16px 24px;font-size:18px}
+.main{display:flex}
+.sidebar{width:220px;background:#f9fafb;border-right:1px solid #eee;padding:20px}
+.write-btn{background:#0071e3;color:white;border:none;width:100%;padding:12px;border-radius:6px;cursor:pointer;margin-bottom:16px}
+.nav-item{padding:10px 12px;border-radius:6px;cursor:pointer;margin-bottom:4px}
+.nav-item:hover{background:#e8f0fe}
+.content{flex:1;padding:24px}
+.login-box{max-width:400px;margin:50px auto;padding:30px;background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.05)}
+.login-box h2{margin-bottom:20px;text-align:center}
+input,textarea{width:100%;padding:12px;margin:8px 0;border:1px solid #ddd;border-radius:6px}
+button{cursor:pointer}
+.mail-item{padding:12px;border-bottom:1px solid #eee;cursor:pointer}
+.mail-item:hover{background:#f8f9fa}
+</style>
+</head>
+<body>
+
+<div class="login-box" id="loginBox">
+  <h2>登录 XXY Mail</h2>
+  <input id="account" placeholder="用户名 或 用户名@xxy.com">
+  <button class="write-btn" onclick="login()">登录</button>
+</div>
+
+<div class="container" id="mailApp" style="display:none">
+  <div class="header">XXY Mail</div>
+  <div class="main">
+    <div class="sidebar">
+      <button class="write-btn" onclick="showWrite()">写邮件</button>
+      <div class="nav-item" onclick="showInbox()">收件箱</div>
+      <div class="nav-item" onclick="showSent()">已发送</div>
+    </div>
+    <div class="content">
+      <div id="writePanel" style="display:none">
+        <input id="to" placeholder="收件人：如 abc@xxy.com">
+        <input id="title" placeholder="标题">
+        <textarea id="content" placeholder="邮件内容" rows="10"></textarea>
+        <button class="write-btn" onclick="sendMail()">发送</button>
+      </div>
+
+      <div id="inboxPanel">
+        <h3>收件箱</h3>
+        <div id="mailList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============== 改成你自己的 GitHub 信息 ==============
+const USER = "xxy150310";
+const REPO = "my-xxy-mail";
+// ======================================================
+
+let currentUser = "";
+
+function cleanAccount(s) {
+  s = s.trim().toLowerCase();
+  return s.replace("@xxy.com", "");
+}
+
+function login() {
+  let acc = document.getElementById("account").value;
+  if (!acc) return alert("请输入账号");
+  currentUser = cleanAccount(acc);
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("mailApp").style.display = "flex";
+  loadInbox();
+}
+
+function showWrite() {
+  document.getElementById("writePanel").style.display = "block";
+  document.getElementById("inboxPanel").style.display = "none";
+}
+
+function showInbox() {
+  document.getElementById("writePanel").style.display = "none";
+  document.getElementById("inboxPanel").style.display = "block";
+  loadInbox();
+}
+
+function showSent() {
+  alert("已发送需要读取自己发出的邮件，可扩展实现");
+}
+
+function sendMail() {
+  let toRaw = document.getElementById("to").value;
+  let title = document.getElementById("title").value;
+  let content = document.getElementById("content").value;
+
+  if (!toRaw || !title || !content) return alert("请填写完整");
+
+  let to = cleanAccount(toRaw);
+  let from = currentUser;
+
+  let body = `
+发件人：${from}@xxy.com
+收件人：${to}@xxy.com
+标题：${title}
+
+内容：
+${content}
+  `;
+
+  let url = new URL(`https://github.com/${USER}/${REPO}/issues/new`);
+  url.searchParams.set("title", `【邮件】to:${to} | ${title}`);
+  url.searchParams.set("body", body);
+  window.open(url.toString(), "_blank");
+}
+
+async function loadInbox() {
+  let list = document.getElementById("mailList");
+  list.innerHTML = "加载中...";
+
+  try {
+    let r = await fetch(`https://api.github.com/repos/${USER}/${REPO}/issues?state=all`);
+    let issues = await r.json();
+
+    let myMails = issues.filter(iss => {
+      let t = iss.title.toLowerCase();
+      return t.includes(`to:${currentUser}`) || t.includes(`to:${currentUser}@xxy.com`);
+    });
+
+    if (myMails.length === 0) {
+      list.innerHTML = "暂无邮件";
+      return;
+    }
+
+    list.innerHTML = myMails.map(m => `
+<div class="mail-item" onclick="openMail(${JSON.stringify(m.body).replace(/"/g, '&quot;')})">
+${m.title}<br>
+<small>${new Date(m.created_at).toLocaleString()}</small>
+</div>
+    `).join("");
+  } catch (e) {
+    list.innerHTML = "加载失败";
+  }
+}
+
+function openMail(body) {
+  alert("邮件内容：\n\n" + body);
+}
+</script>
+</body>
+</html>
