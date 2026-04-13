@@ -3,7 +3,7 @@ window.ojConfig = {
     "C++"
   ],
   "enabledLevels": [
-    5,6
+    1,3,5,6,7
   ],
   "examStartTime": "2026-02-01 17:40:00",
   "adminAccounts": [
