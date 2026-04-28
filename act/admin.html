@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GESP等级认证 - 管理员后台</title>
+    <style>
+        * {margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
+        body {background:#f0f0f0;padding:20px;}
+        .admin-container {max-width:1100px;margin:0 auto;background:#fff;padding:30px;border-radius:8px;box-shadow:0 0 10px rgba(0,0,0,0.1);}
+        .admin-header {border-bottom:1px solid #eee;padding-bottom:20px;margin-bottom:20px;text-align:center;}
+        .admin-header h2 {color:#333;margin-bottom:10px;}
+        .admin-info {font-size:16px;color:#666;margin:5px 0;}
+        .login-area {max-width:400px;margin:40px auto 0 auto;background:#f8f9fa;padding:30px;border-radius:8px;box-shadow:0 0 8px rgba(0,0,0,0.07);}
+        .login-area label {display:block;margin-bottom:8px;color:#555;font-size:16px;}
+        .login-area input {width:100%;padding:10px;margin-bottom:18px;border:1px solid #ddd;border-radius:4px;font-size:16px;}
+        .login-btn {width:100%;padding:12px;background:#007bff;color:#fff;border:none;border-radius:6px;font-size:18px;cursor:pointer;}
+        .login-btn:hover {background:#0056b3;}
+        .logout-btn {padding:8px 20px;background:#6c757d;color:#fff;border:none;border-radius:6px;font-size:15px;cursor:pointer;float:right;}
+        .logout-btn:hover {background:#5a6268;}
+        .paper-list {margin:30px 0;}
+        .paper-item {background:#f8f9fa;padding:20px;border-radius:6px;margin-bottom:20px;border:1px solid #eee;}
+        .paper-header {display:flex;justify-content:space-between;align-items:center;}
+        .paper-title {font-size:18px;color:#007bff;}
+        .score-input {width:60px;padding:6px;font-size:16px;border:1px solid #ccc;border-radius:4px;}
+        .save-btn {padding:6px 18px;background:#28a745;color:#fff;border:none;border-radius:6px;font-size:15px;cursor:pointer;margin-left:10px;}
+        .save-btn:hover {background:#218838;}
+        .question-list {margin-top:15px;}
+        .question-item {margin-bottom:12px;padding:10px;background:#fff;border-radius:4px;border:1px solid #e0e0e0;}
+        .question-title {font-weight:bold;color:#333;}
+        .answer-area {margin-top:6px;}
+        .answer-label {color:#888;}
+        .answer-text {color:#222;}
+        .no-papers {text-align:center;color:#999;font-size:18px;padding:50px 0;}
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h2>GESP等级认证 - 管理员后台</h2>
+            <button class="logout-btn" id="logoutBtn" style="display:none;">退出登录</button>
+            <div class="admin-info" id="adminInfo">请登录管理员账号</div>
+        </div>
+        <div class="login-area" id="loginArea">
+            <label for="adminAccount">账号：</label>
+            <input type="text" id="adminAccount" placeholder="请输入管理员账号">
+            <label for="adminPwd">密码：</label>
+            <input type="password" id="adminPwd" placeholder="请输入密码">
+            <button class="login-btn" id="loginBtn">登录</button>
+        </div>
+        <div class="upload-area" id="uploadArea" style="display:none;margin:30px 0;max-width:500px;">
+            <label style="font-size:16px;color:#555;">上传考生答案文件（JS）：</label>
+            <input type="file" id="answerFileInput" accept=".js" style="margin:10px 0;">
+            <button class="login-btn" id="uploadBtn" style="padding:8px 20px;font-size:16px;width:auto;">上传并加载</button>
+        </div>
+        <div class="paper-list" id="paperList" style="display:none;"></div>
+    </div>
+    <script src="config.js"></script>
+    <script>
+    // 用户卷子数据
+    let userPapers = [];
+    // 管理员登录
+    const adminAccounts = window.ojConfig.adminAccounts;
+    const loginArea = document.getElementById('loginArea');
+    const paperList = document.getElementById('paperList');
+    const adminInfo = document.getElementById('adminInfo');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const uploadArea = document.getElementById('uploadArea');
+    const answerFileInput = document.getElementById('answerFileInput');
+    const uploadBtn = document.getElementById('uploadBtn');
+    let currentAdmin = null;
+    document.getElementById('loginBtn').onclick = function() {
+        const acc = document.getElementById('adminAccount').value.trim();
+        const pwd = document.getElementById('adminPwd').value;
+        const found = adminAccounts.find(a => a.account === acc && a.pwd === pwd);
+        if (found) {
+            currentAdmin = acc;
+            loginArea.style.display = 'none';
+            paperList.style.display = '';
+            logoutBtn.style.display = '';
+            uploadArea.style.display = '';
+            adminInfo.textContent = `欢迎，${acc}！`;
+            renderPapers();
+        } else {
+            alert('账号或密码错误！');
+        }
+    };
+    logoutBtn.onclick = function() {
+        currentAdmin = null;
+        loginArea.style.display = '';
+        paperList.style.display = 'none';
+        logoutBtn.style.display = 'none';
+        uploadArea.style.display = 'none';
+        adminInfo.textContent = '请登录管理员账号';
+    };
+    // 上传并解析考生答案文件
+    uploadBtn.onclick = function() {
+        const file = answerFileInput.files[0];
+        if (!file) {
+            alert('请先选择考生答案JS文件！');
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                // 用 Function 安全解析 window.ojUserAnswer = {...}
+                let js = e.target.result;
+                let answerObj = {};
+                new Function('window', js)(answerObj);
+                if (!answerObj.ojUserAnswer) throw new Error('文件格式不正确！');
+                // 需要加载 questions.js 获取题目内容
+                loadScript('questions.js', function() {
+                    const qList = window.ojQuestions || [];
+                    // 只保留当前考生的题目
+                    const user = answerObj.ojUserAnswer;
+                    // 只显示选择/判断题
+                    const userQuestions = qList.filter(q =>
+                        q.language === user.language && q.level === user.level &&
+                        (q.type === "选择题" || q.type === "判断题")
+                    ).map(q => ({
+                        title: q.title,
+                        userAnswer: user.answers[q.id] || '',
+                        correctAnswer: q.correctAnswer,
+                        score: (user.answers[q.id] === q.correctAnswer ? q.score : 0),
+                        maxScore: q.score
+                    }));
+                    userPapers.push({
+                        username: user.username,
+                        level: user.level,
+                        language: user.language,
+                        submitTime: user.submitTime,
+                        questions: userQuestions,
+                        totalScore: userQuestions.reduce((a,b)=>a+b.score,0)
+                    });
+                    renderPapers();
+                    alert('考生答案已成功导入！');
+                });
+            } catch (err) {
+                alert('文件解析失败：' + err.message);
+            }
+        };
+        reader.readAsText(file, 'utf-8');
+    };
+    function loadScript(src, callback) {
+        const oldScripts = document.querySelectorAll(`script[src*="${src}"]`);
+        oldScripts.forEach(script => script.remove());
+        const script = document.createElement('script');
+        script.src = src + '?rand=' + Math.random();
+        script.type = 'text/javascript';
+        script.charset = 'UTF-8';
+        script.onload = callback;
+        script.onerror = () => alert(`加载${src}失败！请检查文件是否存在`);
+        document.body.appendChild(script);
+    }
+    function renderPapers() {
+        if (!userPapers.length) {
+            paperList.innerHTML = '<div class="no-papers">暂无用户提交的卷子</div>';
+            return;
+        }
+        paperList.innerHTML = userPapers.map((paper, idx) => `
+            <div class="paper-item">
+                <div class="paper-header">
+                    <span class="paper-title">用户：${paper.username} | 等级：${paper.level} | 语言：${paper.language} | 提交时间：${paper.submitTime}</span>
+                    <span>总分：<input type="number" class="score-input" value="${paper.totalScore}" min="0" max="${paper.questions.reduce((a,b)=>a+b.maxScore,0)}" id="scoreInput${idx}"> <button class="save-btn" onclick="saveScore(${idx})">保存</button></span>
+                </div>
+                <div class="question-list">
+                    ${paper.questions.map((q, qidx) => `
+                        <div class="question-item">
+                            <div class="question-title">${q.title}</div>
+                            <div class="answer-area"><span class="answer-label">用户答案：</span><span class="answer-text">${q.userAnswer}</span></div>
+                            <div class="answer-area"><span class="answer-label">正确答案：</span><span class="answer-text">${q.correctAnswer}</span></div>
+                            <div class="answer-area">得分：<input type="number" class="score-input" value="${q.score}" min="0" max="${q.maxScore}" onchange="updateQuestionScore(${idx},${qidx},this.value)"> / ${q.maxScore}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `).join('');
+    }
+    window.updateQuestionScore = function(paperIdx, qIdx, val) {
+        val = Math.max(0, Math.min(Number(val), userPapers[paperIdx].questions[qIdx].maxScore));
+        userPapers[paperIdx].questions[qIdx].score = val;
+        // 自动更新总分
+        userPapers[paperIdx].totalScore = userPapers[paperIdx].questions.reduce((a,b)=>a+b.score,0);
+        renderPapers();
+    };
+    window.saveScore = function(idx) {
+        const input = document.getElementById('scoreInput'+idx);
+        let val = Math.max(0, Math.min(Number(input.value), userPapers[idx].questions.reduce((a,b)=>a+b.maxScore,0)));
+        userPapers[idx].totalScore = val;
+        alert('分数已保存！');
+        renderPapers();
+    };
+    </script>
+</body>
+</html>
